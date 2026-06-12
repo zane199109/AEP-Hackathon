@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Pact Test</title></head>
+<body style="background:#111;color:#0f0;font-family:monospace;padding:20px">
+<h2>🧪 Pact SSE Test</h2>
+<div id="status" style="background:#222;padding:10px;border-radius:4px">等待连接...</div>
+<pre id="log" style="background:#000;padding:10px;margin-top:10px;min-height:200px;border:1px solid #333"></pre>
+
+<script>
+const log = document.getElementById('log');
+const status = document.getElementById('status');
+function addLog(msg) {
+  log.textContent += new Date().toLocaleTimeString() + ' ' + msg + '\n';
+  log.scrollTop = log.scrollHeight;
+}
+
+addLog('Connecting to SSE...');
+const es = new EventSource('/api/events');
+
+es.addEventListener('connected', () => {
+  status.textContent = '✅ SSE CONNECTED';
+  status.style.color = '#0f0';
+  addLog('SSE connected');
+});
+
+es.addEventListener('pact_approved', e => {
+  const data = JSON.parse(e.data);
+  status.textContent = '✅ PACT APPROVED! job_id=' + data.job_id;
+  status.style.background = '#0f0222';
+  addLog('>>> pact_approved: ' + JSON.stringify(data));
+});
+
+es.addEventListener('bounty_posted', e => {
+  const data = JSON.parse(e.data);
+  addLog('bounty_posted: job_id=' + data.job_id + ' status=' + data.status);
+});
+
+es.onerror = () => {
+  status.textContent = '❌ SSE ERROR';
+  status.style.color = '#f00';
+  addLog('SSE error');
+};
+</script>
+</body></html>

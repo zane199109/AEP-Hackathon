@@ -1,0 +1,4 @@
+/* AEP Dashboard — Minimal resets only, MUI handles everything */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; }
+#root { width: 100vw; height: 100vh; }

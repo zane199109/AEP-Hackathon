@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html><body><pre id="log"></pre>
+<script>
+const log = document.getElementById('log')
+function add(msg) { log.textContent += msg + '\n' }
+const es = new EventSource('/api/events')
+es.addEventListener('connected', () => add('🟢 SSE CONNECTED'))
+es.onerror = () => add('🔴 SSE ERROR')
+const events = ['bounty_posted','pact_approved','agent_action','agent_thinking','agent_decided',
+  'evaluation_started','evaluation_result','high_value_approval_required','settled','reputation_changed']
+events.forEach(e => es.addEventListener(e, ev => {
+  add(`📨 ${e}: ${ev.data.slice(0,100)}`)
+}))
+add('⏳ Waiting for SSE events...')
+</script></body></html>

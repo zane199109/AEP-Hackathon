@@ -1,0 +1,59 @@
+# AEP backend configuration template
+# Copy to config.yaml and fill in actual values
+
+server:
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+
+db:
+  dsn: "postgres://postgres:password@localhost:5432/aep?sslmode=disable"
+  max_open: 25
+  max_idle: 10
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+chain:
+  rpc_url: "${BASE_SEPOLIA_RPC}"
+  contract_addr: ""  # fill after Day 1.4 deployment
+  private_key: "${PRIVATE_KEY}"
+
+# Cobo Agentic Wallet (CAW) — see docs/cobo_setup.md for setup
+caw:
+  api_key: "${CAW_API_KEY}"
+  wallet_id: "${CAW_WALLET_ID}"
+  sandbox: true  # false for mainnet
+  timeout: 10s
+  retry:
+    max_attempts: 3
+    base_delay: 1s
+
+fluxa:
+  enabled: true
+  base_url: "http://localhost:8081"
+  timeout: 3s
+
+# LLM provider for dual-track evaluation (Day 3).
+# Supports any OpenAI-compatible API.
+# Examples:
+#   OpenAI:   api_key="sk-...",  model="gpt-4o",         base_url=""
+#   DeepSeek: api_key="sk-...",  model="deepseek-chat",  base_url="https://api.deepseek.com/v1"
+openai:
+  api_key: "${OPENAI_API_KEY}"
+  model: "deepseek-chat"
+  base_url: "https://api.deepseek.com/v1"
+  timeout: 10s
+
+ipfs:
+  pinata_jwt: "${PINATA_JWT}"
+  timeout: 30s
+  retry:
+    max_attempts: 3
+    base_delay: 1s
+
+log:
+  level: info
+  format: json  # json | console

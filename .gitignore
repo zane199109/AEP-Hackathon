@@ -1,0 +1,43 @@
+# === Secrets ===
+conf/.env
+conf/.env.bak
+conf/.env.mpc-backup
+conf/config.yaml
+conf/config.yaml.mpc-backup
+CONTEXT.yaml
+
+# === Dependencies ===
+node_modules/
+frontend-web/node_modules/
+
+# === Build artifacts ===
+frontend-web/dist/
+backend-go/main
+backend-go/*.exe
+*.log
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Project-specific ===
+caw-issue-report.md
+mock_events.jsonl
+
+
+# === Foundry build artifacts ===
+contract-foundry/out/
+contract-foundry/cache/
+contract-foundry/broadcast/
+
+# === Secrets copy (accidental) ===
+conf/.env copy
+
+# === Foundry lib (git submodule) ===
+contract-foundry/lib/forge-std/
