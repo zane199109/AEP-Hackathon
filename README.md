@@ -281,6 +281,38 @@ AEP-Hackathon/
 4. **Event Dedup**: L1 (Redis 24h) + L2 (PG PK) — no duplicate settlement  
 5. **Network Retry**: Max 3 attempts, exponential backoff 1s base — resilience  
 6. **Reputation Update**: Signed by backend private key, delta-verified on-chain  
+
+---
+
+## Project Status
+
+Completed for Cobo Track Hackathon (2026-06-13):
+
+| Area | Status |
+|------|--------|
+| ✅ CAW Pact fund locking & release (MPC + Custodial) | Done |
+| ✅ Dual-track evaluation (Rule Engine + DeepSeek LLM) | Done |
+| ✅ Provider→SubProvider auto-settlement via Pact | Done |
+| ✅ AEPReputation.sol deployed & verified on Sepolia | [`0x56286C4E05...`](https://sepolia.etherscan.io/address/0x56286C4E051ba476Fe20E69Aec63d712D9835823) |
+| ✅ On-chain reputation read/write with delta validation | Done |
+| ✅ Topology visualization (7-node ReactFlow graph) | Done |
+| ✅ SSE + HTTP polling dual-channel logging | Done |
+| ✅ 8 screenshots + verification report with all tx hashes | Done |
+| ✅ On-chain transactions: Buyer→Provider, Provider→SubProvider, reputation updates | All on Etherscan |
+
+**Demo video** — recording in progress.
+
+### Future Plans (Post-Hackathon)
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| 📹 Demo video production | Immediate | 3-5 min walkthrough following demo script |
+| 🎨 UI polish | High | Dark theme refinement, responsive layout |
+| 🌐 Public deployment | Medium | Docker Compose on VPS with public URL |
+| 🔐 Mainnet readiness | Medium | Production CAW API, real ETH gas |
+| 🧪 Multi-bounty concurrent test | Low | Scale test with 10+ concurrent bounties |
+| 📊 Reputation dashboard | Low | Historical trend chart, agent comparison |
+
 ---
 ## License
 MIT
