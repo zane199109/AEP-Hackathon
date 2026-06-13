@@ -192,6 +192,8 @@ func (h *Handler) retryOperation(ctx context.Context, jID uint64, taskName strin
 func (h *Handler) pushTaskFailed(jID uint64, taskName string, err error) {
 	h.sse.pushEvent("agent_action", jID, "failed", "red",
 		fmt.Sprintf(`{"agent":"system","action":"failed","task":"%s","error":"%s"}`, taskName, err.Error()))
+	// Update pipeline so frontend Workflow shows failure instead of hanging
+	h.updatePipeline(jID, "auto_chain_failed")
 }
 
 // ==================== PostBounty ====================
@@ -319,15 +321,17 @@ func (h *Handler) PostBounty(w http.ResponseWriter, r *http.Request) {
 			}
 			ticker.Stop()
 
-			// Step 2: Auto-claim
-			h.log.Info("Provider auto-claiming bounty", zap.Uint64("job_id", jID))
-			h.sse.pushEvent("agent_action", jID, "claiming", "yellow", fmt.Sprintf(`{"agent":"provider","action":"claiming","job_id":%d}`, jID))
-			h.updatePipeline(jID, "claiming")
-			if err := h.autoClaim(pollCtx, jID); err != nil {
-				h.log.Warn("Auto-claim failed", zap.Uint64("job_id", jID), zap.Error(err))
-				h.sse.pushEvent("agent_action", jID, "claim_failed", "red", fmt.Sprintf(`{"agent":"provider","action":"claim_failed","error":"%s"}`, err.Error()))
-				return
-			}
+		// Step 2: Auto-claim (with retry)
+		h.log.Info("Provider auto-claiming bounty", zap.Uint64("job_id", jID))
+		h.sse.pushEvent("agent_action", jID, "claiming", "yellow", fmt.Sprintf(`{"agent":"provider","action":"claiming","job_id":%d}`, jID))
+		h.updatePipeline(jID, "claiming")
+		if err := h.retryOperation(pollCtx, jID, "auto_claim", 3, func() error {
+			return h.autoClaim(pollCtx, jID)
+		}); err != nil {
+			h.log.Warn("Auto-claim failed after retries", zap.Uint64("job_id", jID), zap.Error(err))
+			h.pushTaskFailed(jID, "auto_claim", err)
+			return
+		}
 			h.sse.pushEvent("agent_action", jID, "claimed", "yellow", fmt.Sprintf(`{"agent":"provider","action":"claimed","job_id":%d}`, jID))
 			h.updatePipeline(jID, "claimed")
 
@@ -774,6 +778,17 @@ func (h *Handler) ConfirmJob(w http.ResponseWriter, r *http.Request) {
 
 	var jobID uint64
 	fmt.Sscanf(r.PathValue("jobId"), "%d", &jobID)
+
+	// Verify bounty is in a confirmable state (evaluated, not slashed)
+	bounty, err := h.store.GetBountyByID(ctx, jobID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "bounty not found")
+		return
+	}
+	if bounty.Status == model.StatusSlashed || bounty.Status == model.StatusRefunded {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("cannot confirm bounty in '%s' status", bounty.Status))
+		return
+	}
 
 	if err := h.store.ConfirmBuyerApproval(ctx, jobID); err != nil {
 		h.log.Error("Failed to set BuyerApproval", zap.Uint64("job_id", jobID), zap.Error(err))

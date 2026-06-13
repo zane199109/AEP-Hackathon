@@ -33,6 +33,7 @@ export default function Sidebar() {
       claiming: '⏳ 接单中', creating_sub_bounty: '📋 发子任务',
       generating_delivery: '✍️ 生成中', submitting_delivery: '📤 评估中',
       merging: '🔄 合并中', submitted: '📦 已提交', claim_failed: '❌ 失败',
+      auto_chain_failed: '❌ 流程中断',
     }
     return labels[state.status] || state.message || '进行中'
   }
@@ -296,6 +297,11 @@ export default function Sidebar() {
               {pipelineData.step === 'evaluated_slashed' && (
                 <Chip label="❌ 评估不通过 — 需要仲裁" size="small" color="error"
                   sx={{ width: '100%', fontWeight: 700, fontSize: '0.85rem' }} />
+              )}
+              {/* Auto-chain failed */}
+              {pipelineData.step === 'auto_chain_failed' && (
+                <Chip label="❌ 自动流程中断 — 请刷新页面重试" size="small"
+                  sx={{ width: '100%', fontWeight: 600, bgcolor: '#ef444422', color: '#ef4444', border: '1px solid #ef444444', fontSize: '0.75rem' }} />
               )}
             </>
           )}
