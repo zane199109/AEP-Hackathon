@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -158,6 +159,11 @@ func (c *CAWClient) doRequest(ctx context.Context, method, path string, body int
 		}
 	}
 	return nil
+}
+
+// DoRequest is the public wrapper for doRequest.
+func (c *CAWClient) DoRequest(ctx context.Context, method, path string, body interface{}, out interface{}, extraHeaders ...map[string]string) error {
+	return c.doRequest(ctx, method, path, body, out, extraHeaders...)
 }
 
 // ==================== CAW Provider ====================
@@ -355,6 +361,37 @@ func (p *CAWProvider) CreatePact(ctx context.Context, bizID, walletID, fromAddr,
 	}, nil
 }
 
+// GetTransactionByRequestID retrieves a transaction record by the client-supplied request_id.
+func (p *CAWProvider) GetTransactionByRequestID(ctx context.Context, walletID, requestID string) (int64, string, error) {
+	client := NewCAWClient(p.cfg.APIKey, p.cfg.Sandbox, p.cfg.Timeout, p.log)
+	var result struct {
+		Status  json.Number `json:"status"`
+		TxHash  string      `json:"transaction_hash"`
+	}
+	err := client.doRequest(ctx, "GET", "/wallets/"+walletID+"/transactions/by-request-id/"+requestID, nil, &result)
+	if err != nil {
+		return 0, "", err
+	}
+	statusNum, _ := result.Status.Int64()
+	return statusNum, result.TxHash, nil
+}
+
+// GetTxHashByRequestIDWithKey queries the transaction status using a specific API key.
+// Returns the on-chain tx hash once available.
+func GetTxHashByRequestIDWithKey(ctx context.Context, apiKey, walletID, requestID string, sandbox bool, timeout time.Duration, log *zap.Logger) (int64, string, error) {
+	client := NewCAWClient(apiKey, sandbox, timeout, log)
+	var result struct {
+		Status  json.Number `json:"status"`
+		TxHash  string      `json:"transaction_hash"`
+	}
+	err := client.doRequest(ctx, "GET", "/wallets/"+walletID+"/transactions/by-request-id/"+requestID, nil, &result)
+	if err != nil {
+		return 0, "", err
+	}
+	statusNum, _ := result.Status.Int64()
+	return statusNum, result.TxHash, nil
+}
+
 // GetPactStatus queries the current status of a pact.
 // When status == "active", the pact's API key is available for executing transactions.
 func (p *CAWProvider) GetPactStatus(ctx context.Context, pactID string) (*GetPactResponse, error) {
@@ -379,26 +416,26 @@ func (p *CAWProvider) GetPactStatus(ctx context.Context, pactID string) (*GetPac
 // ReleasePact releases/settles a pact by executing a transfer via the CAW API.
 // Uses the pact's temporary API key to execute the transfer, which may trigger
 // human approval on the CAW App if the policy requires always_review.
-// Returns the transfer status ("pending_approval", "completed", etc.) and any error.
-func (p *CAWProvider) ReleasePact(ctx context.Context, pactID, toAddr, amount, walletID, srcAddr string) (string, error) {
+// Returns transfer status, transaction UUID, and error.
+func (p *CAWProvider) ReleasePact(ctx context.Context, pactID, toAddr, amount, walletID, srcAddr string) (string, string, error) {
 	if p.cfg.DevMode {
 		p.log.Warn("CAW DevMode: simulating pact release", zap.String("pact_id", pactID))
-		return "completed", nil
+		return "completed", "", nil
 	}
 
 	p.log.Info("CAW ReleasePact: fetching pact status", zap.String("pact_id", pactID))
 
 	status, err := p.GetPactStatus(ctx, pactID)
 	if err != nil {
-		return "", fmt.Errorf("release pact: cannot verify status: %w", err)
+		return "", "", fmt.Errorf("release pact: cannot verify status: %w", err)
 	}
 
 	if status.Status != "active" {
-		return "", fmt.Errorf("release pact: pact %s is not active (status: %s)", pactID, status.Status)
+		return "", "", fmt.Errorf("release pact: pact %s is not active (status: %s)", pactID, status.Status)
 	}
 
 	if status.APIKey == "" {
-		return "", fmt.Errorf("release pact: pact %s has no api_key — not activated", pactID)
+		return "", "", fmt.Errorf("release pact: pact %s has no api_key — not activated", pactID)
 	}
 
 	p.log.Info("CAW ReleasePact: executing transfer via pact",
@@ -411,9 +448,10 @@ func (p *CAWProvider) ReleasePact(ctx context.Context, pactID, toAddr, amount, w
 	pactClient := NewCAWClient(status.APIKey, p.cfg.Sandbox, p.cfg.Timeout, p.log)
 
 	var transferResp struct {
-		RequestID  string      `json:"request_id"`
-		RecordUUID string      `json:"record_uuid"`
-		Status     json.Number `json:"status"`
+		RequestID      string      `json:"request_id"`
+		RecordUUID     string      `json:"record_uuid"`
+		Status         json.Number `json:"status"`
+		StatusDisplay  string      `json:"status_display"`
 	}
 	err = DoWithRetry(ctx, RetryConfig{
 		MaxAttempts: p.cfg.Retry.MaxAttempts,
@@ -430,16 +468,31 @@ func (p *CAWProvider) ReleasePact(ctx context.Context, pactID, toAddr, amount, w
 		}, &transferResp)
 	})
 	if err != nil {
-		return "", fmt.Errorf("release pact: transfer failed: %w", err)
+		return "", "", fmt.Errorf("release pact: transfer failed: %w", err)
+	}
+
+	// Map status_display to the expected string values
+	statusStr := transferResp.StatusDisplay
+	if statusStr == "" {
+		statusStr = transferResp.Status.String()
+	}
+	statusStr = strings.ToLower(statusStr)
+	if statusStr == "pendingapproval" {
+		statusStr = "pending_approval"
+	}
+
+	txUUID := transferResp.RequestID
+	if transferResp.RecordUUID != "" {
+		txUUID = transferResp.RecordUUID
 	}
 
 	p.log.Info("CAW pact released (settled)",
 		zap.String("pact_id", pactID),
-		zap.String("status", status.Status),
-		zap.String("transfer_status", transferResp.Status.String()),
-		zap.String("request_id", transferResp.RequestID),
+		zap.String("pact_status", status.Status),
+		zap.String("transfer_status", statusStr),
+		zap.String("tx_uuid", txUUID),
 	)
-	return transferResp.Status.String(), nil
+	return statusStr, txUUID, nil
 }
 
 // ==================== FluxA Provider ====================

@@ -27,7 +27,7 @@ export default function Sidebar() {
   const subProviderState = getAgentState('sub_provider')
 
   const agentStatusText = (state) => {
-    if (!state) return '空闲'
+    if (!state) return ''
     const labels = {
       thinking: '🤔 分析中', decided: '✅ 已决策', claimed: '✅ 已接单',
       claiming: '⏳ 接单中', creating_sub_bounty: '📋 发子任务',
@@ -101,8 +101,96 @@ export default function Sidebar() {
         </CardContent>
       </Card>
 
-      {/* Section 2: Provider Workflow Pipeline */}
-      <Card sx={{ border: pipelineData?.step ? '1px solid #eab308' : '1px solid #1e293b', bgcolor: '#111827' }}>
+      {/* Section 2: Agent Information */}
+      <Card sx={{ border: '1px solid #1e293b', bgcolor: '#111827' }}>
+        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+          <Typography variant="caption" fontWeight={700} sx={{ color: '#64748b', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            🏆 AGENT INFORMATION
+          </Typography>
+
+          {/* Buyer Agent */}
+          <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 1 }}>
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#6366f1', display: 'block', fontSize: '0.6rem' }}>
+              🟣 Buyer Agent
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
+              ID: {BUYER_ADDR ? `${BUYER_ADDR.slice(0, 10)}...${BUYER_ADDR.slice(-4)}` : '加载中...'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
+              发布悬赏任务，通过 CAW Pact 锁定资金
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444', fontSize: '0.7rem' }}>
+                {reputation}
+              </Typography>
+              <Box sx={{ flex: 1 }}>
+                <LinearProgress variant="determinate" value={reputation}
+                  sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444' } }} />
+              </Box>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{reputation}/100</Typography>
+            </Box>
+          </Box>
+
+          {/* Provider Agent */}
+          <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 1 }}>
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#eab308', display: 'block', fontSize: '0.6rem' }}>
+              🟡 Provider Agent
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
+              ID: {PROVIDER_ADDR ? `${PROVIDER_ADDR.slice(0, 10)}...${PROVIDER_ADDR.slice(-4)}` : '加载中...'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
+              自动接单 → 分析任务(LLM) → 发布子任务 → 合并提交
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+              <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.55rem', fontWeight: 600 }}>
+                {agentStatusText(providerState)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(providerReputation), fontSize: '0.7rem' }}>
+                {noRep(providerReputation)}
+              </Typography>
+              <Box sx={{ flex: 1 }}>
+                <LinearProgress variant="determinate" value={repValue(providerReputation)}
+                  sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: repColor(providerReputation) } }} />
+              </Box>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{noRep(providerReputation)}/100</Typography>
+            </Box>
+          </Box>
+
+          {/* Sub-Provider Agent */}
+          <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b' }}>
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#f472b6', display: 'block', fontSize: '0.6rem' }}>
+              🟢 Sub-Provider Agent
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
+              ID: {SUB_PROVIDER_ADDR ? `${SUB_PROVIDER_ADDR.slice(0, 10)}...${SUB_PROVIDER_ADDR.slice(-4)}` : '加载中...'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
+              自动接子单 → LLM生成交付物 → 提交 → AEP评估
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+              <Typography variant="caption" sx={{ color: '#f472b6', fontSize: '0.55rem', fontWeight: 600 }}>
+                {agentStatusText(subProviderState)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(subProviderReputation), fontSize: '0.7rem' }}>
+                {noRep(subProviderReputation)}
+              </Typography>
+              <Box sx={{ flex: 1 }}>
+                <LinearProgress variant="determinate" value={repValue(subProviderReputation)}
+                  sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: repColor(subProviderReputation) } }} />
+              </Box>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{noRep(subProviderReputation)}/100</Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Section 3: Provider Workflow Pipeline */}
+      <Card sx={{ border: pipelineData?.step ? '1px solid #eab308' : '1px solid #1e293b', bgcolor: '#111827', maxHeight: 300, overflow: 'auto' }}>
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
           <Typography variant="caption" fontWeight={700} sx={{ color: '#eab308', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
             ⚡ PROVIDER WORKFLOW
@@ -192,8 +280,7 @@ export default function Sidebar() {
                     sx={{ width: '100%', fontWeight: 600, bgcolor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e44', fontSize: '0.55rem', mb: 0.5 }} />
                   <Button size="small" fullWidth variant="contained"
                     onClick={async () => {
-                      const r = await useStore.getState().confirmRelease()
-                      if (!r?.error) useStore.getState().addLog('🔐 CAW 放款完成', 'release')
+                      await useStore.getState().confirmRelease()
                     }}
                     sx={{ fontSize: '0.6rem', bgcolor: '#22c55e', color: '#000', '&:hover': { bgcolor: '#16a34a' }, py: 0.3 }}>
                     🔐 确认放款 (CAW Release)
@@ -212,120 +299,6 @@ export default function Sidebar() {
               )}
             </>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Section 3: Reputation Panel */}
-      <Card sx={{ border: '1px solid #1e293b', bgcolor: '#111827' }}>
-        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-          <Typography variant="caption" fontWeight={700} sx={{ color: '#64748b', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            🏆 AGENT REPUTATION
-          </Typography>
-
-          {/* Buyer Agent */}
-          <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 1 }}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#6366f1', display: 'block', fontSize: '0.6rem' }}>
-              🟣 Buyer Agent
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
-              ID: {BUYER_ADDR.slice(0, 10)}...{BUYER_ADDR.slice(-4)}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
-              发布悬赏任务，通过 CAW Pact 锁定资金
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" fontWeight={700} sx={{ color: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444', fontSize: '0.7rem' }}>
-                {reputation}
-              </Typography>
-              <Box sx={{ flex: 1 }}>
-                <LinearProgress variant="determinate" value={reputation}
-                  sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444' } }} />
-              </Box>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{reputation}/100</Typography>
-            </Box>
-          </Box>
-
-          {/* Provider Agent */}
-          <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 1 }}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#eab308', display: 'block', fontSize: '0.6rem' }}>
-              🟡 Provider Agent
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
-              ID: {PROVIDER_ADDR.slice(0, 10)}...{PROVIDER_ADDR.slice(-4)}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
-              自动接单 → 分析任务(LLM) → 发布子任务 → 合并提交
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.55rem', fontWeight: 600 }}>
-                {agentStatusText(providerState)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(providerReputation), fontSize: '0.7rem' }}>
-                {noRep(providerReputation)}
-              </Typography>
-              <Box sx={{ flex: 1 }}>
-                <LinearProgress variant="determinate" value={repValue(providerReputation)}
-                  sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: repColor(providerReputation) } }} />
-              </Box>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{noRep(providerReputation)}/100</Typography>
-            </Box>
-          </Box>
-
-          {/* Sub-Provider Agent */}
-          <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#f472b6', display: 'block', fontSize: '0.6rem' }}>
-              🟢 Sub-Provider Agent
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
-              ID: {SUB_PROVIDER_ADDR.slice(0, 10)}...{SUB_PROVIDER_ADDR.slice(-4)}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
-              自动接子单 → LLM生成交付物 → 提交 → AEP评估
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#f472b6', fontSize: '0.55rem', fontWeight: 600 }}>
-                {agentStatusText(subProviderState)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(subProviderReputation), fontSize: '0.7rem' }}>
-                {noRep(subProviderReputation)}
-              </Typography>
-              <Box sx={{ flex: 1 }}>
-                <LinearProgress variant="determinate" value={repValue(subProviderReputation)}
-                  sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: repColor(subProviderReputation) } }} />
-              </Box>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{noRep(subProviderReputation)}/100</Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Section 3.5: On-chain Tx History */}
-      <Card sx={{ border: '1px solid #1e293b', bgcolor: '#111827' }}>
-        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-          <Typography variant="caption" fontWeight={700} sx={{ color: '#64748b', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            ⛓️ 链上交易
-          </Typography>
-          {repTxHashes.length === 0 ? (
-            <Typography variant="caption" sx={{ color: '#334155', fontSize: '0.5rem' }}>
-              暂无私钥交易记录
-            </Typography>
-          ) : repTxHashes.slice(0, 5).map((entry, i) => (
-            <Box key={i} sx={{ p: 0.5, bgcolor: '#0a0e1a', borderRadius: 1, mb: 0.5, border: '1px solid #1e293b' }}>
-              <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem', display: 'block' }}>
-                {entry.agent?.slice(0, 10)}... → {entry.newScore}分 ({entry.delta > 0 ? '+' : ''}{entry.delta})
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#6366f1', fontSize: '0.5rem', display: 'block', wordBreak: 'break-all' }}>
-                <a href={`https://sepolia.etherscan.io/tx/${entry.txHash}`} target="_blank" rel="noopener noreferrer"
-                  style={{ color: '#6366f1' }}>
-                  {entry.txHash?.slice(0, 30)}...
-                </a>
-              </Typography>
-            </Box>
-          ))}
         </CardContent>
       </Card>
 

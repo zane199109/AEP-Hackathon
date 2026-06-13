@@ -26,7 +26,7 @@ C4Context
   Person(auditor, "Auditor / Dev", "Views logs, evaluations, reputation on-chain")
   System(aep, "AEP Protocol", "Escrow + dual-track evaluation + reputation for Agent tasks")
   System_Ext(caw, "Cobo Agentic Wallet", "MPC + Pact-based wallet infra for Agent funds")
-  System_Ext(chain, "EVM Chain (Base Sepolia)", "Hosts AEPReputation.sol and on-chain settlements")
+  System_Ext(chain, "EVM Chain (Sepolia)", "Hosts AEPReputation.sol and on-chain settlements")
   System_Ext(ipfs, "IPFS (Pinata)", "Decentralized storage for delivery artifacts")
   Rel(buyer, aep, "Post bounty, approve settlement")
   Rel(provider, aep, "Claim task, submit delivery")
@@ -50,7 +50,7 @@ C4Container
     Container(engine, "Evaluation Engine", "Rule Engine + DeepSeek LLM", "Dual-track quality verification")
   }
   System_Ext(caw, "Cobo Agentic Wallet (CAW)", "MPC + Pact + Recipe")
-  System_Ext(chain, "EVM Chain (Base Sepolia)", "RPC + Explorer")
+  System_Ext(chain, "EVM Chain (Sepolia)", "RPC + Explorer")
   System_Ext(ipfs, "IPFS (Pinata)", "Pinata JWT")
   System_Ext(db, "PostgreSQL + Redis", "PG 15, Redis 7")
   Rel(buyer, frontend, "Open bounty, approve via CAW")
@@ -182,6 +182,7 @@ Fill in env vars:
 ### 3. Start Backend
 ```bash
 cd backend-go
+export $(grep -v '^#' ../conf/.env | xargs)
 GONOSUMCHECK=* GONOSUMDB=* go run ./cmd/main.go -config ../conf/config.yaml
 ```
 ### 4. Start Frontend

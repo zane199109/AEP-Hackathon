@@ -9,9 +9,17 @@ const API = (path, options = {}) => {
     .then(r => r.json().catch(() => ({ status: r.status })))
 }
 
-// Wallet addresses for Buyer and Provider (from backend config)
-const BUYER_ADDR = '0xa115523ac8f1391075c0f0d74418a4f159df53fe'
-const PROVIDER_ADDR = '0x276e8c07f3c140d6f894ee5567df146d58db3c56'
+// Wallet addresses for Buyer and Provider (from backend config, fetched on init)
+let BUYER_ADDR = ''
+let PROVIDER_ADDR = ''
+
+// Fetch agent addresses from backend
+fetch('/api/agents').then(r => r.json()).then(data => {
+  if (data) {
+    BUYER_ADDR = data.buyer?.address || BUYER_ADDR
+    PROVIDER_ADDR = data.provider?.address || PROVIDER_ADDR
+  }
+}).catch(() => {})
 
 // Reverse reputation calculation: given reward_eth, return score delta
 function calcRepReward(rewardEth) {
@@ -43,6 +51,9 @@ export function AppProvider({ children }) {
   const [terminalEvents, setTerminalEvents] = useState([])
   // SSE status
   const [sseConnected, setSseConnected] = useState(false)
+  // Sync bounties from Store (updated by useSSE)
+  const storeBounties = useStore(s => s.bounties)
+  useEffect(() => { setBounties(storeBounties) }, [storeBounties])
   // Loading
   const [loading, setLoading] = useState(false)
   // Latest created pact_id for polling (persisted across reloads)
@@ -60,12 +71,16 @@ export function AppProvider({ children }) {
     }
   }, [lastPactId])
   
-
-
-
+  // Pact polling effects...
   const addTerminal = useCallback((msg, type = 'info') => {
-    setTerminalEvents(prev => [{ time: new Date().toLocaleTimeString(), text: msg, type }, ...prev].slice(0, 50))
+    console.log('[ADD_TERMINAL]', msg, type)
+    setTerminalEvents(prev => [{ time: new Date(Date.now()).toLocaleTimeString(), text: msg, type }, ...prev].slice(0, 50))
   }, [])
+  
+  // Expose addTerminal globally so Store actions can use it
+  useEffect(() => {
+    window.__addTerminal = addTerminal
+  }, [addTerminal])
 
 // Poll pact status every 2s while waiting (fallback to SSE)
   useEffect(() => {
@@ -76,7 +91,7 @@ export function AppProvider({ children }) {
         const data = await res.json()
         if (data && data.status === 'active') {
           clearInterval(interval)
-          addTerminal(`✅ Pact approved: ${data.pact_id?.slice(0,8)}...`, 'release')
+          addTerminal('✅ CAW pact approved — bounty published!', 'release')
           setLastPactId(null)
           setPactStatus('active')
           useStore.setState(state => ({
@@ -92,123 +107,148 @@ export function AppProvider({ children }) {
     return () => clearInterval(interval)
   }, [lastPactId, phase, addTerminal])
 // Poll pipeline status after pact approval
+  const loggedStepsRef = useRef(new Set())
   useEffect(() => {
     if (!lastJobId || phase === 'idle' || phase === 'pending_approval') return
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/bounty/${lastJobId}/pipeline`)
         const data = await res.json()
-        if (data && data.step && data.step !== pipelineStep) {
+        if (!data || !data.step) return
+        
+        // Store full pipeline data in Zustand for UI consumption
+        useStore.setState({ pipelineData: data })
+        
+        // Check if step changed
+        if (data.step !== pipelineStep) {
           setPipelineStep(data.step)
-          // Store full pipeline data in Zustand for UI consumption
-          useStore.setState({ pipelineData: data })
-          const labels = {
-            claiming: '⏳ Provider 正在接单...', claimed: '✅ Provider 已接单',
-            analyzing: '💭 Provider LLM 分析中...', decided: '🤔 Provider 已决策',
-            creating_sub_bounty: '📋 Provider 发起子任务...',
-            sub_claiming: '⏳ Sub-Provider 接单中...', sub_claimed: '✅ Sub-Provider 已接单',
-            generating_sub_delivery: '✍️ Sub-Provider 生成交付物...',
-            evaluating_sub: '🛡️ AEP 评估子任务...', sub_verified: '✅ 子任务通过',
-            submitted: '📦 Provider 最终交付已提交',
-            evaluating_final: '🛡️ AEP 评估主任务...',
-            evaluated_verified: '✅ 评估通过，等待 Buyer 确认',
-            evaluated_slashed: '❌ 评估不通过，进入争议',
-            awaiting_confirmation: '⏳ 等待 Buyer 在 CAW 确认放款',
-            settling: '💰 评估通过，自动放款中...',
-            settled: '✅ 放款完成，全链路结束',
-            settle_failed: '❌ 放款失败',
-            release_pending: '🔐 CAW 放款待审批 — 请在 Cobo 钱包确认',
-            pact_approved: '✅ Pact 已审批',
-          }
-          if (labels[data.step]) {
-            addTerminal(labels[data.step], data.step.includes('verified') ? 'release' : data.step.includes('slash') ? 'slash' : 'info')
-          }
-          // Show reasoning when available
-          if (data.reasoning) {
-            addTerminal(`💡 推理: ${data.reasoning.slice(0, 120)}`, 'info')
-          }
-          // Show evaluation details when available
-          if (data.eval_status && data.eval_score > 0) {
-            addTerminal(`📊 评估结果: ${data.eval_status} | 分数: ${(data.eval_score * 100).toFixed(0)}分 | ${data.eval_summary?.slice(0, 80) || ''}`, 'info')
-          }
-          // Show delivery available
-          if (data.sub_delivery && data.step === 'generating_sub_delivery') {
-            addTerminal(`📄 Sub-Provider 交付物已生成 (${data.sub_delivery.length}字符)`, 'info')
-          }
-          if (data.final_delivery && data.step === 'submitted') {
-            addTerminal(`📄 Provider 最终交付物已提交 (${data.final_delivery.length}字符)`, 'info')
-          }
-          // Set phase based on pipeline step
-          if (data.step === 'evaluated_slashed') {
+        }
+        
+        // Iterate through all steps_reached (new steps since last poll) and log each
+        const steps = data.steps_reached || [data.step]
+        for (const s of steps) {
+          if (loggedStepsRef.current.has(s)) continue
+          loggedStepsRef.current.add(s)
+          
+          if (s === 'pact_approved') {
+            addTerminal('✅ CAW pact approved — bounty published!', 'release')
+            useStore.setState({ phase: 'published' })
+          } else if (s === 'claiming') {
+            addTerminal('⏳ Provider 正在接单...', 'info')
+          } else if (s === 'claimed') {
+            addTerminal('✅ Provider 已接单', 'claim')
+            useStore.setState({ phase: 'claimed' })
+          } else if (s === 'analyzing') {
+            addTerminal('💭 Provider 分析任务中...', 'info')
+          } else if (s === 'decided') {
+            addTerminal('🤔 Provider 推理: ' + (data.reasoning || '').slice(0, 50), 'info')
+          } else if (s === 'creating_sub_bounty') {
+            addTerminal('📋 Provider 发起子任务...', 'info')
+            useStore.setState({ phase: 'creating_sub_bounty' })
+          } else if (s === 'sub_claiming') {
+            addTerminal('⏳ Sub-Provider 正在接单...', 'info')
+          } else if (s === 'sub_claimed') {
+            addTerminal('✅ Sub-Provider 已接单', 'claim')
+            useStore.setState({ phase: 'sub_claimed' })
+          } else if (s === 'generating_sub_delivery') {
+            addTerminal('💭 Sub-Provider 生成子任务交付物...', 'info')
+          } else if (s === 'evaluating_sub') {
+            addTerminal('🛡️ AEP 评估子任务...', 'info')
+          } else if (s === 'sub_verified') {
+            const score = data.sub_eval_score ? (data.sub_eval_score * 100).toFixed(0) : ''
+            addTerminal(`📊 子任务评估通过${score ? ' | 分数: ' + score + '分' : ''}`, 'info')
+          } else if (s === 'submitted') {
+            addTerminal('📦 Provider 最终交付已提交', 'submit')
+          } else if (s === 'evaluating_final') {
+            addTerminal('🛡️ AEP 评估最终交付...', 'info')
+            useStore.setState({ phase: 'evaluated' })
+          } else if (s === 'evaluated_verified') {
+            const score = data.eval_score ? (data.eval_score * 100).toFixed(0) : ''
+            addTerminal(`📊 最终评估通过${score ? ' | 分数: ' + score + '分' : ''}`, 'info')
+          } else if (s === 'evaluated_slashed') {
+            addTerminal('⚠️ 评估不通过，悬赏进入争议状态', 'slash')
             useStore.setState({ phase: 'disputed' })
-          } else if (data.step === 'awaiting_confirmation') {
+          } else if (s === 'awaiting_confirmation') {
+            addTerminal('⏳ 等待 Buyer 在 CAW 确认放款', 'info')
             useStore.setState({ phase: 'verified' })
-          } else if (data.step === 'settled') {
+          } else if (s === 'settled') {
+            addTerminal('⏳ 结算已提交，等待链上确认...', 'info')
             useStore.setState({ phase: 'settled' })
+            // Fallback: populate chain records when SSE drops
+            const st = useStore.getState()
+            if (!st.repTxHashes.some(e => e.type === 'transfer' && e.from === 'provider')) {
+              st.addRepTxHash({
+                agent: 'sub_provider', oldScore: '', newScore: '',
+                delta: '', txHash: data.child_tx_hash || '',
+                type: 'transfer', from: 'provider', to: 'sub_provider', amount: '0.005',
+              })
+            }
+            if (!st.repTxHashes.some(e => e.type === 'transfer' && e.from === 'buyer')) {
+              st.addRepTxHash({
+                agent: 'provider', oldScore: '', newScore: '',
+                delta: '', txHash: data.parent_tx_hash || '',
+                type: 'transfer', from: 'buyer', to: 'provider', amount: '',
+              })
+            }
+            // Check if both tx hashes already available (from pipeline)
+            if (data.parent_tx_hash && data.child_tx_hash) {
+              addTerminal('✅ 放款完成，全链路结束', 'release')
+            }
+            // Fetch latest on-chain reputations after settlement
+            setTimeout(async () => {
+              await st.fetchReputation()
+            }, 3000)
+          } else {
+            addTerminal(`📋 ${s}`, 'info')
+          }
+
+          // Also check for late-arriving parent_tx_hash
+          if (s === 'settled' && data.parent_tx_hash && data.child_tx_hash) {
+            addTerminal('✅ 放款完成，全链路结束', 'release')
           }
         }
-        if (data.step === 'awaiting_confirmation' || data.step?.startsWith('evaluated_') || data.step === 'settled' || data.step === 'settle_failed') {
+        // Check for tx hashes on every settled poll (even if step already logged)
+        if (data.step === 'settled' && data.parent_tx_hash && data.child_tx_hash) {
+          const st = useStore.getState()
+          if (!st.terminalEvents.some(e => e.text.includes('放款完成，全链路结束'))) {
+            addTerminal('✅ 放款完成，全链路结束', 'release')
+          }
+        }
+        // Update chain records with late-arriving tx hashes
+        if (data.step === 'settled') {
+          const st = useStore.getState()
+          if (data.child_tx_hash && !st.repTxHashes.find(e => e.from === 'provider')?.txHash) {
+            st.addRepTxHash({
+              agent: 'sub_provider', from: 'provider', to: 'sub_provider', amount: '0.005',
+              type: 'transfer', txHash: data.child_tx_hash,
+              oldScore: '', newScore: '', delta: '',
+            })
+          }
+          if (data.parent_tx_hash && !st.repTxHashes.find(e => e.from === 'buyer')?.txHash) {
+            st.addRepTxHash({
+              agent: 'provider', from: 'buyer', to: 'provider', amount: '',
+              type: 'transfer', txHash: data.parent_tx_hash,
+              oldScore: '', newScore: '', delta: '',
+            })
+          }
+        }
+        // Stop polling when both tx hashes arrive, or on failure
+        if (data.step === 'settle_failed' || data.step?.startsWith('evaluated_slashed')) {
+          clearInterval(interval)
+        }
+        if (data.step === 'settled' && data.child_tx_hash && data.parent_tx_hash) {
           clearInterval(interval)
         }
       } catch (e) {}
     }, 2000)
     return () => clearInterval(interval)
   }, [lastJobId, phase, pipelineStep, addTerminal])
-// SSE connection
-  useEffect(() => {
-    let es, timer
-    function connect() {
-      es = new EventSource('/api/events')
-      es.addEventListener('connected', () => setSseConnected(true))
-      es.onerror = () => { setSseConnected(false); es.close(); timer = setTimeout(connect, 3000) }
-
-      es.addEventListener('bounty_posted', e => {
-        try {
-          const data = JSON.parse(e.data)
-          const bounty = {
-            id: data.job_id,
-            title: `Bounty #${data.job_id}`,
-            reward: '0.001',
-            deadline: '2026-06-10',
-            status: data.status,
-            pactId: data.pact_id || lastPactId,
-            pactStatus: pactStatus || (lastPactId ? 'pending_approval' : 'active'),
-          }
-          setBounties(prev => [...prev, bounty])
-          addTerminal(`📌 Bounty Posted — Job #${data.job_id}`, 'lock')
-        } catch (err) {}
-      })
-
-      es.addEventListener('claimed', e => {
-        try {
-          const data = JSON.parse(e.data)
-          addTerminal(`🤝 Bounty Claimed — Job #${data.job_id}`, 'claim')
-        } catch (err) {}
-      })
-
-      es.addEventListener('submitted', e => {
-        try {
-          const data = JSON.parse(e.data)
-          addTerminal(`📦 Delivery Submitted — Job #${data.job_id} | Status: ${data.status}`, 'submit')
-        } catch (err) {}
-      })
-
-      es.addEventListener('settled', e => {
-        try {
-          const data = JSON.parse(e.data)
-          addTerminal(`✅ Funds Settled — Job #${data.job_id}`, 'release')
-        } catch (err) {}
-      })
-
-
-    }
-    connect()
-    return () => { if (es) es.close(); clearTimeout(timer) }
-  }, [addTerminal])
 
   // Create bounty
   const createBounty = useCallback(async (params) => {
     pollingDone.current = false
+    setTerminalEvents([]) // Clear terminal logs before new bounty
+    loggedStepsRef.current = new Set() // Reset step tracking for new bounty
     setLoading(true)
     useStore.setState({ phase: 'pending_approval' })
     setPactStatus('pending_approval')
@@ -228,6 +268,7 @@ export function AppProvider({ children }) {
     // Start polling pact status
     if (data.pact_id) {
       setLastPactId(data.pact_id)
+      useStore.setState({ lastPactId: data.pact_id })
       }
     if (data.job_id) {
       setLastJobId(data.job_id)
@@ -345,6 +386,7 @@ export function AppProvider({ children }) {
     createBounty, claimBounty, submitDelivery, confirmPayment, rejectBounty,
     resetDemo, setEvaluationResult,
     phase, pactStatus, lastPactId, BUYER_ADDR, PROVIDER_ADDR,
+    addTerminal,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

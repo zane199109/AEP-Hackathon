@@ -29,7 +29,7 @@ func main() {
 	offline := flag.Bool("offline", false, "run in offline mode (read mock_events.jsonl)")
 	flag.Parse()
 
-	// 初始化 Logger
+	// initialize Logger
 	logger, err := zap.NewProduction()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to create logger: %v\n", err)
@@ -37,7 +37,7 @@ func main() {
 	}
 	defer logger.Sync() //nolint:errcheck
 
-	// 加载配置
+	// load config
 	cfg, err := config.Load(*cfgPath)
 	if err != nil {
 		logger.Fatal("failed to load config", zap.String("path", *cfgPath), zap.Error(err))
@@ -46,7 +46,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 初始化 Store (PG + Redis)
+	//initialize Store (PG + Redis)
 	s, err := store.New(ctx, cfg, logger)
 	if err != nil {
 		logger.Fatal("failed to initialize store", zap.Error(err))
@@ -58,21 +58,21 @@ func main() {
 	fluxaProvider := provider.NewFluxAProvider(cfg.FluxA, logger)
 	ipfsProvider := provider.NewIPFSProvider(cfg.IPFS, logger)
 
-	// Initialize on-chain reputation provider (Day 5 — ERC-8004)
+	// Initialize on-chain reputation provider
 	onChainRep := provider.NewOnChainReputationProvider(cfg.Chain, logger)
 
-	// Initialize dual-track evaluation engine (Day 3)
+	// Initialize dual-track evaluation engine
 	ruleEngine := engine.NewRuleEvaluator(logger)
 
-	// New template-based rule engine (Day 1 redesign: deterministic + AI-extracted params)
+	// New template-based rule engine
 	templateEngine := rule.NewRuleEngine()
 	llmEngine := engine.NewLLMEvaluator(cfg.OpenAI, logger)
 	agg := engine.NewAggregator(logger)
 
-	// Initialize settlement relayer (Day 4)
-	relayerSvc := relayer.New(s, cawProvider, logger)
+	// Initialize settlement relayer
+	relayerSvc := relayer.New(s, cawProvider, logger, cfg.CAW.ProviderAPIKey, cfg.CAW.ProviderWalletID, cfg.CAW.ProviderAddr, cfg.CAW.SubProviderAddr, cfg.CAW.Sandbox)
 
-	// Initialize SSE hub for frontend topology (Day 5)
+	// Initialize SSE hub for frontend topology
 	sseHub := api.NewSSEHub()
 
 	// Initialize event listener (skip in offline mode)
@@ -161,7 +161,7 @@ func main() {
 		WriteTimeout: cfg.Server.WriteTimeout,
 	}
 
-	// 优雅关闭
+	// graceful shutdown
 	go func() {
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)

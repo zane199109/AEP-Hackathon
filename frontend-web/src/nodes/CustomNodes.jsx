@@ -83,3 +83,11 @@ export function SettlementNode({ data }) {
     </BaseNode>
   )
 }
+
+export function SubProviderNode({ data }) {
+  return (
+    <BaseNode data={data}>
+      <Box sx={{ fontSize: '1.2rem', mb: 0.3 }}>🔨</Box>
+    </BaseNode>
+  )
+}

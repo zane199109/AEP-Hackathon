@@ -2,8 +2,9 @@
 conf/.env
 conf/.env.bak
 conf/.env.mpc-backup
+conf/.env.mpc-backup*
 conf/config.yaml
-conf/config.yaml.mpc-backup
+conf/config.yaml.*
 CONTEXT.yaml
 
 # === Dependencies ===
@@ -41,3 +42,6 @@ conf/.env copy
 
 # === Foundry lib (git submodule) ===
 contract-foundry/lib/forge-std/
+
+# === Backup ===
+backup/

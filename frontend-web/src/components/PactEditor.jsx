@@ -56,7 +56,9 @@ export default function PactEditor() {
       if (data.suggested_deadline_days) {
         const d = new Date()
         d.setDate(d.getDate() + data.suggested_deadline_days)
-        suggestions.deadline = d.toISOString().slice(0, 16)
+        // Use local time string, not UTC ISO string (which is 8 hours behind in UTC+8)
+        const pad = (n) => String(n).padStart(2, '0')
+        suggestions.deadline = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
       }
       if (data.suggested_min_reputation) suggestions.minReputation = data.suggested_min_reputation
       updateForm({
@@ -76,11 +78,10 @@ export default function PactEditor() {
 
   const handlePublish = async () => {
     const amountWei = (parseFloat(form.reward) * 10 ** ETH_DECIMALS).toFixed(0)
-    // Format deadline: add seconds and UTC marker for time.RFC3339 parsing
+    // Format deadline: keep local time (no Z suffix)
     let deadlineVal = form.deadline
-    if (!deadlineVal.includes('Z')) {
-      // datetime-local gives "YYYY-MM-DDTHH:mm" — add seconds if missing
-      deadlineVal += deadlineVal.match(/:\d{2}$/) ? ':00Z' : 'Z'
+    if (!deadlineVal.includes('Z') && deadlineVal.length <= 16) {
+      deadlineVal += ':00'
     }
     const result = await createBounty({
       title: form.title,

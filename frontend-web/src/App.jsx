@@ -39,7 +39,7 @@ const theme = createTheme({
 })
 
 function Dashboard() {
-  const { sseConnected, terminalEvents, phase, evaluationResult, settled } = useApp()
+  const { sseConnected, terminalEvents, phase, evaluationResult, settled, addTerminal } = useApp()
   const viewMode = useStore(s => s.viewMode)
   const isDrawerOpen = useStore(s => s.isDrawerOpen)
   const [snack, setSnack] = useState({ open: false, msg: '', severity: 'success' })
@@ -48,7 +48,7 @@ function Dashboard() {
   useEffect(() => { useStore.setState({ sseConnected, settled }) }, [sseConnected, settled])
 
   // Initialize SSE
-  useSSE()
+  useSSE({ addLog: addTerminal })
 
   // Fetch on-chain reputation on mount
   useEffect(() => {
@@ -124,7 +124,6 @@ function Dashboard() {
 
       {/* Approval Modal */}
       <ApprovalModal />
-      <AgentPipeline />
 
       {/* Styles */}
       <style>{`

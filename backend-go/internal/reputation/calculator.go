@@ -20,10 +20,10 @@ var amountTiers = []struct {
 	maxWei  uint64
 	score   float64
 }{
-	{wei(0.001), 0},    // < 0.001 ETH → 0
-	{wei(0.01), 25},    // 0.001 ~ 0.01 ETH → 25
-	{wei(0.1), 50},     // 0.01 ~ 0.1 ETH → 50
-	{wei(1.0), 75},     // 0.1 ~ 1 ETH → 75
+	{wei(0.001), 30},   // < 0.001 ETH → 30
+	{wei(0.01), 50},    // 0.001 ~ 0.01 ETH → 50
+	{wei(0.1), 75},     // 0.01 ~ 0.1 ETH → 75
+	{wei(1.0), 90},     // 0.1 ~ 1 ETH → 90
 	{math.MaxUint64, 100}, // ≥ 1 ETH → 100
 }
 
@@ -32,8 +32,8 @@ func wei(eth float64) uint64 {
 }
 
 const (
-	qualityWeight = 0.50
-	amountWeight  = 0.30
+	qualityWeight = 0.70
+	amountWeight  = 0.10
 	speedWeight   = 0.20
 
 	inactiveDays    = 30

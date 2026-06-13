@@ -103,6 +103,10 @@ func (h *SSEHub) SSEHandler(w http.ResponseWriter, r *http.Request) {
 			data, _ := json.Marshal(evt)
 			fmt.Fprintf(w, "event: %s\ndata: %s\n\n", evt.Type, data)
 			flusher.Flush()
+		case <-time.After(15 * time.Second):
+			// Keepalive: send a comment to prevent proxy/browser timeout
+			fmt.Fprintf(w, ": keepalive\n\n")
+			flusher.Flush()
 		case <-r.Context().Done():
 			return
 		}

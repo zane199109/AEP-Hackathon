@@ -95,8 +95,9 @@ redis-cli ping
 curl -s https://api-core.agenticwallet.dev.cobo.com/api/v1/wallets \
   -H "X-API-Key: $CAW_API_KEY" | jq
 
-# 4. 启动后端
+```bash
 cd backend-go
+export $(grep -v '^#' ../conf/.env | xargs)
 GONOSUMCHECK=* GONOSUMDB=* go run ./cmd/main.go -config ../conf/config.yaml
 ```
 
@@ -109,4 +110,4 @@ GONOSUMCHECK=* GONOSUMDB=* go run ./cmd/main.go -config ../conf/config.yaml
 | 数据库 + Redis | `AEP-Hackathon/docker-compose.yml` | ✅ 已创建，`docker compose up -d` 即可 |
 | 环境变量 | `AEP-Hackathon/conf/.env` | 复制模板 → 填入真实值 |
 | 后端配置 | `AEP-Hackathon/conf/config.yaml` | 复制模板 → 确认配置 |
-| CAN 钱包设置 | `AEP-Hackathon/docs/cobo_setup.md` | 按步骤操作 |
+| CAW 钱包设置 | `AEP-Hackathon/docs/cobo_setup.md` | 按步骤操作 |

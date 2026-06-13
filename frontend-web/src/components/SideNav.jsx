@@ -27,7 +27,7 @@ export default function SideNav() {
         {menuItems.map(item => (
           <Box key={item.key} sx={{
             display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.2, cursor: item.active ? 'pointer' : 'default',
-            color: item.active ? '#00f3ff' : '#64748b', opacity: item.active ? 1 : 0.7,
+            color: item.active ? '#00f3ff' : '#d7e0ecff', opacity: item.active ? 1 : 0.7,
             borderLeft: item.active ? '2px solid #00f3ff' : '2px solid transparent',
             bgcolor: item.active ? '#00f3ff08' : 'transparent',
             '&:hover': item.active ? { bgcolor: '#00f3ff11' } : {},

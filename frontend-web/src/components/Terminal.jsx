@@ -61,10 +61,10 @@ export default function Terminal() {
           <Typography variant="caption" sx={{ color: '#334155' }}>
             {'>'} Waiting for events... Connect via SSE and interact with the dashboard.
           </Typography>
-        ) : terminalEvents.map((e, i) => (
+        ) : [...terminalEvents].reverse().map((e, i) => (
           <Box key={i} sx={{
             display: 'flex', gap: 1, py: 0.15,
-            opacity: i === 0 ? 1 : Math.max(0.4, 1 - i * 0.04), // Fade older entries
+            opacity: 1,
             fontFamily: 'monospace', fontSize: '0.7rem',
           }}>
             <Typography variant="caption" sx={{ color: '#475569', flexShrink: 0, fontSize: '0.6rem' }}>
@@ -73,7 +73,7 @@ export default function Terminal() {
             <Typography variant="caption" sx={{
               color: COLORS[e.type] || COLORS.info,
               whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-              fontWeight: i === 0 ? 600 : 400,
+              fontWeight: 400,
               fontSize: '0.65rem',
             }}>
               {'>'} {e.text}

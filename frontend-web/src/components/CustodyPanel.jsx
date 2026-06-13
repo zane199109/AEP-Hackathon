@@ -6,6 +6,7 @@ export default function CustodyPanel() {
   const pendingApprovals = useStore(s => s.pendingApprovals)
   const settled = useStore(s => s.settled)
   const phase = useStore(s => s.phase)
+  const repTxHashes = useStore(s => s.repTxHashes)
   const [pactStatuses, setPactStatuses] = useState({})
   const [history, setHistory] = useState([])
   const [splitPos, setSplitPos] = useState(55)
@@ -151,7 +152,7 @@ export default function CustodyPanel() {
         }}
       />
 
-      {/* History - scrollable */}
+      {/* On-chain Records — replaced "历史审批" */}
       <Box sx={{
         flex: `1 1 ${100 - splitPos}%`, overflow: 'auto', p: 1.5,
         borderTop: 'none',
@@ -159,21 +160,49 @@ export default function CustodyPanel() {
         '&::-webkit-scrollbar-track': { background: '#0a0e1a' },
         '&::-webkit-scrollbar-thumb': { background: '#2a2a3a', borderRadius: 2 },
       }}>
-        <Typography variant="caption" fontWeight={600} sx={{ color: '#475569', fontSize: '0.55rem', display: 'block', mb: 0.5 }}>
-          历史审批
+        <Typography variant="caption" fontWeight={700} sx={{ color: '#eab308', letterSpacing: 1, mb: 1, display: 'block' }}>
+          ⛓️ 链上记录
         </Typography>
-        {history.length === 0 ? (
-          <Typography variant="caption" sx={{ color: '#334155', fontSize: '0.5rem' }}>
-            暂无历史记录
+        {repTxHashes.length === 0 ? (
+          <Typography variant="caption" sx={{ color: '#334155', fontSize: '0.6rem', textAlign: 'center', display: 'block', mt: 2 }}>
+            暂无链上交易记录
           </Typography>
-        ) : history.map((item, i) => (
-          <Box key={item.pactId || i} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.3, borderBottom: '1px solid #1e293b' }}>
-            <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.55rem' }}>
-              ✅ #{item.jobId}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>
-              {item.approvedAt}
-            </Typography>
+        ) : repTxHashes.map((entry, i) => (
+          <Box key={i} sx={{
+            p: 1, borderRadius: 1, bgcolor: '#0a0a1a', mb: 0.5,
+            border: '1px solid #1e293b', flexShrink: 0,
+          }}>
+              {entry.type === 'transfer' ? (
+                <>
+                  <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.65rem', display: 'block' }}>
+                    💸 {entry.from === 'buyer' ? 'Buyer → Provider' : 'Provider → SubProvider'}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.6rem', display: 'block' }}>
+                    {entry.amount} ETH
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.2 }}>
+                    <a href={`https://sepolia.etherscan.io/tx/${entry.txHash}`} target="_blank" rel="noopener noreferrer"
+                      style={{ color: '#6366f1' }}>
+                      {entry.txHash?.slice(0, 20)}...
+                    </a>
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.65rem', display: 'block' }}>
+                    🏅 {entry.agent?.slice(0, 10)}... {entry.delta > 0 ? '+' : ''}{entry.delta}分
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.6rem', display: 'block' }}>
+                    {entry.oldScore} → {entry.newScore}分
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.2 }}>
+                    <a href={`https://sepolia.etherscan.io/tx/${entry.txHash}`} target="_blank" rel="noopener noreferrer"
+                      style={{ color: '#6366f1' }}>
+                      {entry.txHash?.slice(0, 20)}...
+                    </a>
+                  </Typography>
+                </>
+              )}
           </Box>
         ))}
       </Box>

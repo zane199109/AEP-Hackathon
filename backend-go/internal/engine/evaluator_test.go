@@ -347,7 +347,7 @@ func TestAggregator_BothPass(t *testing.T) {
 	if verdict.Status != "verified" {
 		t.Errorf("expected 'verified', got '%s'", verdict.Status)
 	}
-	// Score should be LLM score (方案D: 规则引擎只做否决, 不参与评分)
+	// Score should be LLM score
 	expectedScore := 0.85
 	if verdict.Score > expectedScore+0.01 || verdict.Score < expectedScore-0.01 {
 		t.Errorf("expected score %.2f, got %.2f", expectedScore, verdict.Score)

@@ -5,11 +5,23 @@ const API = (path, options = {}) => {
   return fetch(`/api${path}`, opts).then(r => r.json().catch(() => ({ status: r.status })))
 }
 
-const BUYER_ADDR = '0xa115523ac8f1391075c0f0d74418a4f159df53fe'
-const PROVIDER_ADDR = '0x276e8c07f3c140d6f894ee5567df146d58db3c56'
-const SUB_PROVIDER_ADDR = '0xe813c4298dc1263de7ec22293f1175ed2afa0623'
-
 const calcRepReward = (rewardEth) => Math.max(1, Math.floor((rewardEth || 0) * 10))
+
+// Dynamic addresses — populated from GET /api/agents on init
+let BUYER_ADDR = ''
+let PROVIDER_ADDR = ''
+let SUB_PROVIDER_ADDR = ''
+
+// Fetch agent addresses from backend, then trigger reputation fetch
+API('/agents').then(data => {
+  if (data) {
+    BUYER_ADDR = data.buyer?.address || BUYER_ADDR
+    PROVIDER_ADDR = data.provider?.address || PROVIDER_ADDR
+    SUB_PROVIDER_ADDR = data.sub_provider?.address || SUB_PROVIDER_ADDR
+    // Fetch reputation now that addresses are loaded
+    setTimeout(() => useStore.getState().fetchReputation(), 500)
+  }
+}).catch(() => {})
 
 const useStore = create((set, get) => ({
   // === State ===
@@ -45,16 +57,22 @@ const useStore = create((set, get) => ({
   repTxHashes: [],
 
   // === Actions ===
-  addLog: (text, type = 'info') => set(state => ({
-    terminalEvents: [{ time: new Date().toLocaleTimeString(), text, type }, ...state.terminalEvents].slice(0, 50)
-  })),
+  addLog: (text, type = 'info') => {
+    if (window.__addTerminal) window.__addTerminal(text, type)
+    return set(state => ({
+      terminalEvents: [{ time: new Date().toLocaleTimeString(), text, type }, ...state.terminalEvents].slice(0, 50)
+    }))
+  },
 
   setPhase: (phase) => set({ phase }),
 
   fetchReputation: async () => {
+    const pAddr = PROVIDER_ADDR
+    const sAddr = SUB_PROVIDER_ADDR
+    if (!pAddr || !sAddr) return // addresses not loaded yet
     const [bp, sp] = await Promise.all([
-      API(`/reputation/${PROVIDER_ADDR}`).catch(() => ({ score: 50 })),
-      API(`/reputation/${SUB_PROVIDER_ADDR}`).catch(() => ({ score: 50 })),
+      API(`/reputation/${pAddr}`).catch(() => ({ score: 50 })),
+      API(`/reputation/${sAddr}`).catch(() => ({ score: 50 })),
     ])
     set({ providerReputation: bp.score, subProviderReputation: sp.score })
   },
@@ -211,7 +229,7 @@ const useStore = create((set, get) => ({
     const data = await API(`/confirm/${state.lastConfirmJob}`, { method: 'POST' })
     set({ loading: false })
     if (data.error) return { error: data.error }
-    get().addLog(`🔐 CAW Release | Job: ${state.lastConfirmJob} | ✅ 放款完成`, 'release')
+    get().addLog(`🔐 确认放款请求已发送 — Job #${state.lastConfirmJob}`, 'release')
     return data
   },
 
@@ -241,9 +259,17 @@ const useStore = create((set, get) => ({
     return updates
   }),
 
-  addRepTxHash: (entry) => set(state => ({
-    repTxHashes: [entry, ...state.repTxHashes].slice(0, 20)
-  })),
+  addRepTxHash: (entry) => set(state => {
+    // Upsert: if record with same type+from exists, update it
+    const existingIdx = state.repTxHashes.findIndex(e => e.type === entry.type && e.from === entry.from)
+    if (existingIdx >= 0 && entry.txHash) {
+      const updated = [...state.repTxHashes]
+      updated[existingIdx] = { ...updated[existingIdx], ...entry }
+      return { repTxHashes: updated }
+    }
+    // Otherwise append
+    return { repTxHashes: [entry, ...state.repTxHashes].slice(0, 20) }
+  }),
 
   resetDemo: () => {
     set({

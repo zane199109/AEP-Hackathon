@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import useStore from '../store/useStore'
-export default function useSSE() {
-  const addLog = useStore(s => s.addLog)
+export default function useSSE({ addLog: externalAddLog } = {}) {
+  const addLog = externalAddLog || useStore(s => s.addLog)
   const setPhase = useStore(s => s.setPhase)
   const setSseConnected = () => useStore.setState({ sseConnected: true })
   const setEvaluation = useStore(s => s.setEvaluation)
@@ -9,14 +9,14 @@ export default function useSSE() {
   const addApproval = useStore(s => s.addApproval)
   const removeApproval = useStore(s => s.removeApproval)
   useEffect(() => {
-    let es, timer
+    let es
     function connect() {
       es = new EventSource('/api/events')
       es.addEventListener('connected', () => useStore.setState({ sseConnected: true }))
       es.onerror = () => {
         useStore.setState({ sseConnected: false })
-        es.close()
-        timer = setTimeout(connect, 3000)
+        // Don't close — EventSource auto-reconnects natively.
+        // Manual close+setTimeout creates a window where events are lost.
       }
       es.addEventListener('bounty_posted', e => {
         try {
@@ -33,20 +33,17 @@ export default function useSSE() {
               pactStatus: state.lastPactId ? 'pending_approval' : 'active',
             }]
           }))
-          addLog(`📌 Bounty Posted — Job #${data.job_id}`, 'lock')
         } catch (err) { /* ignore */ }
       })
       es.addEventListener('claimed', e => {
         try {
           const data = JSON.parse(e.data)
-          addLog(`🤝 Bounty Claimed — Job #${data.job_id}`, 'claim')
     useStore.setState({ phase: 'claimed' })
         } catch (err) { /* ignore */ }
       })
       es.addEventListener('submitted', e => {
         try {
           const data = JSON.parse(e.data)
-          addLog(`📦 Delivery Submitted — Job #${data.job_id} | Status: ${data.status}`, 'submit')
     useStore.setState({ phase: 'submitted' })
         } catch (err) { /* ignore */ }
       })
@@ -65,6 +62,11 @@ export default function useSSE() {
           let extra = {}
           try { extra = JSON.parse(data.message) } catch (err) {}
           addLog(`🤖 AEP评估: ${data.status} — Job #${data.job_id}`, 'submit')
+          if (data.status === 'verified') {
+            addLog(`📊 评估结果: ${data.status} | 分数: ${((extra.score || 0) * 100).toFixed(0)}分 | ${(extra.summary || '').slice(0, 80)}`, 'info')
+            // Check for sub-bounty vs main: sub-bounty has different job_id
+            useStore.setState({ phase: 'evaluated' })
+          }
           if (data.status === 'slashed') {
             useStore.setState({
               phase: 'disputed',
@@ -166,8 +168,7 @@ export default function useSSE() {
             reasoning: extra.reasoning || '',
             type: 'decided',
           })
-          addLog(`🤔 ${extra.agent?.toUpperCase()} 决策: ${extra.reasoning?.slice(0, 60)}`, 'info')
-          addLog(`📋 ${extra.agent?.toUpperCase()} 决定: ${needsSub ? '需要子任务 ➔ 发起委托' : '自主完成'}`, 'decided')
+          addLog(`🤔 ${extra.agent?.toUpperCase()} 推理: ${extra.reasoning?.slice(0, 60)} ${needsSub ? '→ 需要子任务协助' : '→ 自主完成'}`, 'info')
         } catch (err) {}
       })
       es.addEventListener('agent_action', e => {
@@ -193,10 +194,18 @@ export default function useSSE() {
           })
           if (extra.action === 'claiming') {
             addLog(`⏳ ${extra.agent?.toUpperCase()} 正在接单...`, 'info')
-          } else if (extra.action === 'claimed') {
+          } else          if (extra.action === 'claimed') {
             addLog(`✅ ${extra.agent?.toUpperCase()} 接单成功 #${extra.job_id}`, 'claim')
+            if (extra.agent === 'provider') useStore.setState({ phase: 'claimed' })
+            if (extra.agent === 'sub_provider') useStore.setState({ phase: 'sub_claimed' })
+          } else if (extra.action === 'retrying') {
+            addLog(`🔄 重试中: ${extra.task} (第${extra.attempt}次) — ${extra.error?.slice(0, 50)}`, 'info')
+          } else if (extra.action === 'failed') {
+            addLog(`❌ 任务失败: ${extra.task} — ${extra.error?.slice(0, 60)}`, 'slash')
+            useStore.setState({ phase: 'failed' })
           } else if (extra.action === 'creating_sub_bounty') {
             addLog(`📋 ${extra.agent?.toUpperCase()} 发起子任务: ${extra.description?.slice(0, 40)}`, 'info')
+            useStore.setState({ phase: 'creating_sub_bounty' })
           } else if (extra.action === 'submitted') {
             addLog(`📦 ${extra.agent?.toUpperCase()} 最终交付已提交`, 'submit')
           } else if (extra.action === 'submitting_delivery') {
@@ -232,11 +241,18 @@ export default function useSSE() {
             settled: true,
             phase: 'settled'
           }))
-          addLog(`✅ Funds Settled — Job #${data.job_id}`, 'release')
+          addLog('✅ 放款完成，全链路结束', 'release')
           // Refresh on-chain reputations after settlement
           setTimeout(() => useStore.getState().fetchReputation(), 2000)
           useStore.getState().pollReputationUntilChange()
 
+        } catch (err) { /* ignore */ }
+      })
+      es.addEventListener('awaiting_confirmation', e => {
+        try {
+          const data = JSON.parse(e.data)
+          addLog('⏳ 等待 Buyer 在 CAW 确认放款', 'info')
+          useStore.setState({ phase: 'verified' })
         } catch (err) { /* ignore */ }
       })
       es.addEventListener('slashed', e => {
@@ -249,8 +265,24 @@ export default function useSSE() {
           addLog(`⛓️ Slashed — Job #${data.job_id}`, 'slash')
         } catch (err) { /* ignore */ }
       })
+      es.addEventListener('transfer_completed', e => {
+        try {
+          const data = JSON.parse(e.data)
+          let extra = {}
+          try { extra = JSON.parse(data.message) } catch (err) { /* ignore */ }
+          const txHash = extra.txHash || ''
+          const fromLabel = extra.from === 'buyer' ? 'Buyer→Provider' : 'Provider→SubProvider'
+          addLog(`💸 ${fromLabel} 转账完成: ${txHash.slice(0, 20)}...`, 'release')
+          useStore.getState().addRepTxHash({
+            agent: extra.from === 'buyer' ? 'provider' : 'sub_provider',
+            oldScore: '', newScore: '',
+            delta: '', txHash: txHash,
+            type: 'transfer', from: extra.from, to: extra.to, amount: extra.amount,
+          })
+        } catch (err) { /* ignore */ }
+      })
     }
     connect()
-    return () => { if (es) es.close(); clearTimeout(timer) }
+    return () => { if (es) es.close() }
   }, [addLog, setPhase, setEvaluation, setPactStatus, addApproval, removeApproval])
 }

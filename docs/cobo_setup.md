@@ -90,7 +90,7 @@ Expected response includes `address` — this is the wallet's address on EVM cha
 ## Step 5: Fund the Wallet
 
 1. Copy the address from Step 4
-2. Get Base Sepolia test ETH from a faucet (e.g. https://base-sepolia-faucet.tools/)
+2. Get Sepolia test ETH from a faucet
 3. Send test ETH to that address
 
 ## Step 6: (Optional) Pair with CAW App
@@ -119,7 +119,9 @@ Add to `~/.bashrc` or use the `.env` file.
 
 Start the backend:
 ```bash
-cd AEP-Hackathon/backend-go
+cd AEP-Hackathon
+export $(grep -v '^#' conf/.env | xargs)
+cd backend-go
 GONOSUMCHECK=* GONOSUMDB=* go run ./cmd/main.go -config ../conf/config.demo.yaml
 ```
 

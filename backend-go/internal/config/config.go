@@ -47,12 +47,17 @@ type ChainConfig struct {
 }
 
 type CAWConfig struct {
-	APIKey    string        `mapstructure:"api_key"`
-	WalletID  string        `mapstructure:"wallet_id"`
-	Sandbox   bool          `mapstructure:"sandbox"`
-	DevMode   bool          `mapstructure:"dev_mode"`
-	Timeout   time.Duration `mapstructure:"timeout"`
-	Retry     RetryConfig   `mapstructure:"retry"`
+	APIKey          string        `mapstructure:"api_key"`
+	WalletID        string        `mapstructure:"wallet_id"`
+	BuyerAddr       string        `mapstructure:"buyer_addr"`
+	ProviderAddr    string        `mapstructure:"provider_addr"`
+	SubProviderAddr string        `mapstructure:"sub_provider_addr"`
+	ProviderAPIKey  string        `mapstructure:"provider_api_key"`
+	ProviderWalletID string       `mapstructure:"provider_wallet_id"`
+	Sandbox         bool          `mapstructure:"sandbox"`
+	DevMode         bool          `mapstructure:"dev_mode"`
+	Timeout         time.Duration `mapstructure:"timeout"`
+	Retry           RetryConfig   `mapstructure:"retry"`
 }
 
 type FluxAConfig struct {
@@ -126,6 +131,11 @@ func Load(path string) (*Config, error) {
 	// Explicit env var overrides (Viper's AutomaticEnv doesn't override empty strings)
 	cfg.CAW.APIKey = env("CAW_API_KEY", cfg.CAW.APIKey)
 	cfg.CAW.WalletID = env("CAW_WALLET_ID", cfg.CAW.WalletID)
+	cfg.CAW.BuyerAddr = env("BUYER_ADDRESS", cfg.CAW.BuyerAddr)
+	cfg.CAW.ProviderAddr = env("PROVIDER_ADDRESS", cfg.CAW.ProviderAddr)
+	cfg.CAW.SubProviderAddr = env("SUB_PROVIDER_ADDRESS", cfg.CAW.SubProviderAddr)
+	cfg.CAW.ProviderAPIKey = env("PROVIDER_CAW_API_KEY", cfg.CAW.ProviderAPIKey)
+	cfg.CAW.ProviderWalletID = env("PROVIDER_CAW_WALLET_ID", cfg.CAW.ProviderWalletID)
 	cfg.Chain.RPCURL = env("BASE_SEPOLIA_RPC", cfg.Chain.RPCURL)
 	cfg.Chain.PrivateKey = env("PRIVATE_KEY", cfg.Chain.PrivateKey)
 	cfg.OpenAI.APIKey = env("OPENAI_API_KEY", cfg.OpenAI.APIKey)
