@@ -300,7 +300,7 @@ Completed for Cobo Track Hackathon (2026-06-13):
 | ✅ 8 screenshots + verification report with all tx hashes | Done |
 | ✅ On-chain transactions: Buyer→Provider, Provider→SubProvider, reputation updates | All on Etherscan |
 
-**Demo video** — recording in progress.
+**Demo video** — [📺 Watch on YouTube](https://youtu.be/MaFf7fj7Q_Y)
 
 ### Future Plans (Post-Hackathon)
 

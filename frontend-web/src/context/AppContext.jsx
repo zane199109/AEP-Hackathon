@@ -180,14 +180,14 @@ export function AppProvider({ children }) {
               st.addRepTxHash({
                 agent: 'sub_provider', oldScore: '', newScore: '',
                 delta: '', txHash: data.child_tx_hash || '',
-                type: 'transfer', from: 'provider', to: 'sub_provider', amount: '0.005',
+                type: 'transfer', from: 'provider', to: 'sub_provider', amount: data.child_amount || '',
               })
             }
             if (!st.repTxHashes.some(e => e.type === 'transfer' && e.from === 'buyer')) {
               st.addRepTxHash({
                 agent: 'provider', oldScore: '', newScore: '',
                 delta: '', txHash: data.parent_tx_hash || '',
-                type: 'transfer', from: 'buyer', to: 'provider', amount: '',
+                type: 'transfer', from: 'buyer', to: 'provider', amount: data.parent_amount || '',
               })
             }
             // Check if both tx hashes already available (from pipeline)

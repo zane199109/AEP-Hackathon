@@ -45,3 +45,6 @@ contract-foundry/lib/forge-std/
 
 # === Backup ===
 backup/
+
+# === Video (large files excluded) ===
+videos/*.mp4

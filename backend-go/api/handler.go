@@ -104,6 +104,8 @@ type PipelineData struct {
 	SubEvalLLMReason     string  `json:"sub_eval_llm_reason,omitempty"`
 	ParentTxHash         string  `json:"parent_tx_hash,omitempty"`
 	ChildTxHash          string  `json:"child_tx_hash,omitempty"`
+	ParentAmount         string  `json:"parent_amount,omitempty"`
+	ChildAmount          string  `json:"child_amount,omitempty"`
 }
 
 // getEvalQualityScore retrieves the evaluation quality score from pipeline data.
@@ -870,15 +872,17 @@ func (h *Handler) ConfirmJob(w http.ResponseWriter, r *http.Request) {
 		if !result.Success {
 			h.log.Warn("Relayer: settlement failed", zap.Uint64("job_id", jID), zap.String("status", result.Status), zap.String("message", result.Message))
 		}
-		// Store tx hashes in pipeline data for frontend polling to read
+		// Store tx hashes + amounts in pipeline data for frontend polling to read
 		if result.Success {
 			if val, ok := h.pipeline.Load(jID); ok {
 				if pd, ok := val.(*PipelineData); ok {
 					if result.ChildTxHash != "" {
 						pd.ChildTxHash = result.ChildTxHash
+						pd.ChildAmount = childAmount
 					}
 					if result.ParentTxHash != "" {
 						pd.ParentTxHash = result.ParentTxHash
+						pd.ParentAmount = parentAmount
 					}
 					h.pipeline.Store(jID, pd)
 				}
