@@ -32,8 +32,8 @@
 
 | Agent | Score | Source |
 |-------|-------|--------|
-| Provider | **87** | On-chain (no fallback) |
-| Sub-Provider | **89** | On-chain (no fallback) |
+| Provider | **94** | On-chain (no fallback) |
+| Sub-Provider | **86** | On-chain (no fallback) |
 
 ---
 
@@ -45,6 +45,7 @@
 | Provider→SubProvider settlement | `0xa343a18f9299a5e2888d52ed7d6b3d81455ed78a96eb2c7eae1e39a3a7379557` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0xa343a18f9299a5e2888d52ed7d6b3d81455ed78a96eb2c7eae1e39a3a7379557) |
 | Gas key→Buyer (0.05 ETH top-up) | `0xceb7936d09a28568233fd2129832d97c0765fd9b194ceddf4a2028e2a3e16614` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0xceb7936d09a28568233fd2129832d97c0765fd9b194ceddf4a2028e2a3e16614) |
 | Provider reputation update (+3) | `0x5a69e26d305a81e802b0af11139463875c302998823b5213cb3d397406c67712` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0x5a69e26d305a81e802b0af11139463875c302998823b5213cb3d397406c67712) |
+| Sub-Provider reputation update (-3) | `0x52c83a54927d889a9d757cc787bc5c012b30060c2dd75aa5488d067e688d7bf8` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0x52c83a54927d889a9d757cc787bc5c012b30060c2dd75aa5488d067e688d7bf8) |
 
 ---
 

@@ -38,7 +38,7 @@ export default function Terminal() {
           {'>'} COBO_TERMINAL
         </Typography>
         <Tooltip title={
-          <Typography variant="caption" sx={{ fontSize: '0.65rem', lineHeight: 1.5 }}>
+          <Typography variant="caption" sx={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
             Funds are custodied by Cobo Wallet-as-a-Service.
             Lock/Release operations execute via the Cobo Agentic Wallet API.
             In demo mode, CAW Guard confirmation is simulated.
@@ -65,16 +65,16 @@ export default function Terminal() {
           <Box key={i} sx={{
             display: 'flex', gap: 1, py: 0.15,
             opacity: 1,
-            fontFamily: 'monospace', fontSize: '0.7rem',
+            fontFamily: 'monospace', fontSize: '0.85rem',
           }}>
-            <Typography variant="caption" sx={{ color: '#475569', flexShrink: 0, fontSize: '0.6rem' }}>
+            <Typography variant="caption" sx={{ color: '#475569', flexShrink: 0, fontSize: '0.75rem' }}>
               {e.time}
             </Typography>
             <Typography variant="caption" sx={{
               color: COLORS[e.type] || COLORS.info,
               whiteSpace: 'pre-wrap', wordBreak: 'break-all',
               fontWeight: 400,
-              fontSize: '0.65rem',
+              fontSize: '0.8rem',
             }}>
               {'>'} {e.text}
             </Typography>

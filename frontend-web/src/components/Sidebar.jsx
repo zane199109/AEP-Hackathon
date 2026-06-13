@@ -79,7 +79,7 @@ export default function Sidebar() {
       <Card sx={{ border: '1px solid #1e293b', bgcolor: '#111827' }}>
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
           <Typography variant="caption" fontWeight={700} sx={{ color: '#64748b', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            📋 OPEN BOUNTIES <Chip label={bounties.length} size="small" sx={{ height: 18, fontSize: '0.55rem', bgcolor: '#6366f133', color: '#6366f1' }} />
+            📋 OPEN BOUNTIES <Chip label={bounties.length} size="small" sx={{ height: 18, fontSize: '0.85rem', bgcolor: '#6366f133', color: '#6366f1' }} />
           </Typography>
           {bounties.length === 0 ? (
             <Typography variant="caption" sx={{ color: '#475569' }}>No open bounties. Create one with Pact Editor.</Typography>
@@ -87,13 +87,13 @@ export default function Sidebar() {
             <Box key={b.id} sx={{ p: 1, mb: 0.5, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b' }}>
               <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', display: 'block' }}>{b.title}</Typography>
               <Box sx={{ display: 'flex', gap: 1, mt: 0.3 }}>
-                <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.6rem' }}>{b.reward} ETH</Typography>
-                <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.6rem' }}>Due: {b.deadline}</Typography>
+                <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.75rem' }}>{b.reward} ETH</Typography>
+                <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>Due: {b.deadline}</Typography>
                 {b.pactStatus === 'pending_approval' && (
-                  <Chip label="Pending" size="small" sx={{ height: 16, fontSize: '0.5rem', bgcolor: '#eab30833', color: '#eab308' }} />
+                  <Chip label="Pending" size="small" sx={{ height: 16, fontSize: '0.8rem', bgcolor: '#eab30833', color: '#eab308' }} />
                 )}
                 {(!b.pactStatus || b.pactStatus === 'active') && (
-                  <Chip label="Ready" size="small" sx={{ height: 16, fontSize: '0.5rem', bgcolor: '#22c55e33', color: '#22c55e' }} />
+                  <Chip label="Ready" size="small" sx={{ height: 16, fontSize: '0.8rem', bgcolor: '#22c55e33', color: '#22c55e' }} />
                 )}
               </Box>
             </Box>
@@ -110,80 +110,80 @@ export default function Sidebar() {
 
           {/* Buyer Agent */}
           <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 1 }}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#6366f1', display: 'block', fontSize: '0.6rem' }}>
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#6366f1', display: 'block', fontSize: '0.75rem' }}>
               🟣 Buyer Agent
             </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mb: 0.3 }}>
               ID: {BUYER_ADDR ? `${BUYER_ADDR.slice(0, 10)}...${BUYER_ADDR.slice(-4)}` : '加载中...'}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem', display: 'block', mb: 0.5 }}>
               发布悬赏任务，通过 CAW Pact 锁定资金
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" fontWeight={700} sx={{ color: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444', fontSize: '0.7rem' }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444', fontSize: '0.85rem' }}>
                 {reputation}
               </Typography>
               <Box sx={{ flex: 1 }}>
                 <LinearProgress variant="determinate" value={reputation}
                   sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: reputation >= 70 ? '#22c55e' : reputation >= 40 ? '#eab308' : '#ef4444' } }} />
               </Box>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{reputation}/100</Typography>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem' }}>{reputation}/100</Typography>
             </Box>
           </Box>
 
           {/* Provider Agent */}
           <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 1 }}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#eab308', display: 'block', fontSize: '0.6rem' }}>
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#eab308', display: 'block', fontSize: '0.75rem' }}>
               🟡 Provider Agent
             </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mb: 0.3 }}>
               ID: {PROVIDER_ADDR ? `${PROVIDER_ADDR.slice(0, 10)}...${PROVIDER_ADDR.slice(-4)}` : '加载中...'}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem', display: 'block', mb: 0.5 }}>
               自动接单 → 分析任务(LLM) → 发布子任务 → 合并提交
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.55rem', fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.85rem', fontWeight: 600 }}>
                 {agentStatusText(providerState)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(providerReputation), fontSize: '0.7rem' }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(providerReputation), fontSize: '0.85rem' }}>
                 {noRep(providerReputation)}
               </Typography>
               <Box sx={{ flex: 1 }}>
                 <LinearProgress variant="determinate" value={repValue(providerReputation)}
                   sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: repColor(providerReputation) } }} />
               </Box>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{noRep(providerReputation)}/100</Typography>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem' }}>{noRep(providerReputation)}/100</Typography>
             </Box>
           </Box>
 
           {/* Sub-Provider Agent */}
           <Box sx={{ p: 1, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#f472b6', display: 'block', fontSize: '0.6rem' }}>
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#f472b6', display: 'block', fontSize: '0.75rem' }}>
               🟢 Sub-Provider Agent
             </Typography>
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mb: 0.3 }}>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mb: 0.3 }}>
               ID: {SUB_PROVIDER_ADDR ? `${SUB_PROVIDER_ADDR.slice(0, 10)}...${SUB_PROVIDER_ADDR.slice(-4)}` : '加载中...'}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', display: 'block', mb: 0.5 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem', display: 'block', mb: 0.5 }}>
               自动接子单 → LLM生成交付物 → 提交 → AEP评估
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#f472b6', fontSize: '0.55rem', fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: '#f472b6', fontSize: '0.85rem', fontWeight: 600 }}>
                 {agentStatusText(subProviderState)}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(subProviderReputation), fontSize: '0.7rem' }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: repColor(subProviderReputation), fontSize: '0.85rem' }}>
                 {noRep(subProviderReputation)}
               </Typography>
               <Box sx={{ flex: 1 }}>
                 <LinearProgress variant="determinate" value={repValue(subProviderReputation)}
                   sx={{ height: 4, borderRadius: 2, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: repColor(subProviderReputation) } }} />
               </Box>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem' }}>{noRep(subProviderReputation)}/100</Typography>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem' }}>{noRep(subProviderReputation)}/100</Typography>
             </Box>
           </Box>
         </CardContent>
@@ -194,7 +194,7 @@ export default function Sidebar() {
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
           <Typography variant="caption" fontWeight={700} sx={{ color: '#eab308', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
             ⚡ PROVIDER WORKFLOW
-            {pipelineData?.step && <Chip label={pipelineData.step} size="small" sx={{ height: 16, fontSize: '0.5rem', bgcolor: '#eab30833', color: '#eab308' }} />}
+            {pipelineData?.step && <Chip label={pipelineData.step} size="small" sx={{ height: 16, fontSize: '0.8rem', bgcolor: '#eab30833', color: '#eab308' }} />}
           </Typography>
 
           {!pipelineData?.step ? (
@@ -206,17 +206,17 @@ export default function Sidebar() {
                 {['claiming','analyzing','decided','creating_sub_bounty','sub_claimed','generating_sub_delivery','submitted','evaluating_final','evaluated_verified','settled'].map(s => {
                   const steps = {claiming:'接单',analyzing:'分析',decided:'决策',creating_sub_bounty:'子任务',sub_claimed:'子接单',generating_sub_delivery:'子交付',submitted:'提交',evaluating_final:'评估',evaluated_verified:'通过',settled:'放款'}
                   const done = ['claiming','analyzing','decided','creating_sub_bounty','sub_claimed','generating_sub_delivery','submitted','evaluating_final','evaluated_verified','settled'].indexOf(s) <= ['claiming','analyzing','decided','creating_sub_bounty','sub_claimed','generating_sub_delivery','submitted','evaluating_final','evaluated_verified','settled'].indexOf(pipelineData.step)
-                  return <Chip key={s} label={steps[s]||s} size="small" sx={{ height: 14, fontSize: '0.45rem', bgcolor: done ? '#22c55e33' : '#1e293b', color: done ? '#22c55e' : '#475569' }} />
+                  return <Chip key={s} label={steps[s]||s} size="small" sx={{ height: 14, fontSize: '0.75rem', bgcolor: done ? '#22c55e33' : '#1e293b', color: done ? '#22c55e' : '#475569' }} />
                 })}
               </Box>
 
               {/* Reasoning */}
               {pipelineData.reasoning && (
                 <Box sx={{ p: 0.8, bgcolor: '#0a0e1a', borderRadius: 1, border: '1px solid #1e293b', mb: 0.8 }}>
-                  <Typography variant="caption" fontWeight={600} sx={{ color: '#a855f7', fontSize: '0.55rem', display: 'block', mb: 0.3 }}>
+                  <Typography variant="caption" fontWeight={600} sx={{ color: '#a855f7', fontSize: '0.85rem', display: 'block', mb: 0.3 }}>
                     💭 LLM 推理
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem', display: 'block', lineHeight: 1.3 }}>
+                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.8rem', display: 'block', lineHeight: 1.3 }}>
                     {pipelineData.reasoning}
                   </Typography>
                 </Box>
@@ -229,7 +229,7 @@ export default function Sidebar() {
                     const sd = {thinking:{icon:'💭'},decided:{icon:'🤔'},claimed:{icon:'✅'},claiming:{icon:'⏳'},creating_sub_bounty:{icon:'📋'},generating_delivery:{icon:'✍️'},submitting:{icon:'📤'},submitted:{icon:'📦'}}
                     const icon = sd[item.status]?.icon || '•'
                     return (
-                      <Typography key={i} variant="caption" sx={{ color: '#64748b', fontSize: '0.48rem', display: 'block', py: 0.1 }}>
+                      <Typography key={i} variant="caption" sx={{ color: '#64748b', fontSize: '0.63rem', display: 'block', py: 0.1 }}>
                         {icon} {item.agent === 'provider' ? 'Provider' : 'Sub-Provider'} — {item.message}
                       </Typography>
                     )
@@ -241,13 +241,13 @@ export default function Sidebar() {
               <Box sx={{ display: 'flex', gap: 0.5, mb: 0.8, flexWrap: 'wrap' }}>
                 {pipelineData.sub_delivery && (
                   <Button size="small" variant="outlined" onClick={() => viewDelivery(pipelineData.sub_delivery)}
-                    sx={{ fontSize: '0.5rem', borderColor: '#f472b644', color: '#f472b6', py: 0.1, minWidth: 0 }}>
+                    sx={{ fontSize: '0.8rem', borderColor: '#f472b644', color: '#f472b6', py: 0.1, minWidth: 0 }}>
                     📄 子交付物
                   </Button>
                 )}
                 {pipelineData.final_delivery && (
                   <Button size="small" variant="outlined" onClick={() => viewDelivery(pipelineData.final_delivery)}
-                    sx={{ fontSize: '0.5rem', borderColor: '#22c55e44', color: '#22c55e', py: 0.1, minWidth: 0 }}>
+                    sx={{ fontSize: '0.8rem', borderColor: '#22c55e44', color: '#22c55e', py: 0.1, minWidth: 0 }}>
                     📄 最终交付物
                   </Button>
                 )}
@@ -257,16 +257,16 @@ export default function Sidebar() {
               {pipelineData.eval_status && (
                 <Box sx={{ p: 0.8, bgcolor: '#0a0e1a', borderRadius: 1, border: `1px solid ${pipelineData.eval_status === 'verified' ? '#22c55e44' : '#ef444444'}`, mb: 0.8 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" fontWeight={600} sx={{ color: pipelineData.eval_status === 'verified' ? '#22c55e' : '#ef4444', fontSize: '0.55rem' }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ color: pipelineData.eval_status === 'verified' ? '#22c55e' : '#ef4444', fontSize: '0.85rem' }}>
                       {pipelineData.eval_status === 'verified' ? '✅ 评估通过' : '❌ 评估不通过'}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem' }}>
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.8rem' }}>
                       {(pipelineData.eval_score * 100).toFixed(0)}分
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
                     <Button size="small" variant="outlined" onClick={() => setEvalOpen(true)}
-                      sx={{ fontSize: '0.45rem', borderColor: '#6366f144', color: '#6366f1', py: 0, minWidth: 0, height: 16, lineHeight: 1 }}>
+                      sx={{ fontSize: '0.75rem', borderColor: '#6366f144', color: '#6366f1', py: 0, minWidth: 0, height: 16, lineHeight: 1 }}>
                       📊 评估详情
                     </Button>
                   </Box>
@@ -277,25 +277,25 @@ export default function Sidebar() {
               {pipelineData.step === 'awaiting_confirmation' && (
                 <Box>
                   <Chip label="⏳ 评估通过，等待 Buyer 确认放款" size="small"
-                    sx={{ width: '100%', fontWeight: 600, bgcolor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e44', fontSize: '0.55rem', mb: 0.5 }} />
+                    sx={{ width: '100%', fontWeight: 600, bgcolor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e44', fontSize: '0.85rem', mb: 0.5 }} />
                   <Button size="small" fullWidth variant="contained"
                     onClick={async () => {
                       await useStore.getState().confirmRelease()
                     }}
-                    sx={{ fontSize: '0.6rem', bgcolor: '#22c55e', color: '#000', '&:hover': { bgcolor: '#16a34a' }, py: 0.3 }}>
+                    sx={{ fontSize: '0.75rem', bgcolor: '#22c55e', color: '#000', '&:hover': { bgcolor: '#16a34a' }, py: 0.3 }}>
                     🔐 确认放款 (CAW Release)
                   </Button>
                 </Box>
               )}
               {pipelineData.step === 'settled' && (
                 <Chip label="✅ 放款完成，全链路结束" size="small"
-                  sx={{ width: '100%', fontWeight: 600, bgcolor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e44', fontSize: '0.55rem' }} />
+                  sx={{ width: '100%', fontWeight: 600, bgcolor: '#22c55e22', color: '#22c55e', border: '1px solid #22c55e44', fontSize: '0.85rem' }} />
               )}
 
               {/* Slashed - show arbitration */}
               {pipelineData.step === 'evaluated_slashed' && (
                 <Chip label="❌ 评估不通过 — 需要仲裁" size="small" color="error"
-                  sx={{ width: '100%', fontWeight: 700, fontSize: '0.55rem' }} />
+                  sx={{ width: '100%', fontWeight: 700, fontSize: '0.85rem' }} />
               )}
             </>
           )}
@@ -342,60 +342,60 @@ export default function Sidebar() {
           {/* ---- Sub-Task Evaluation ---- */}
           {pipelineData?.sub_eval_status && (
             <>
-              <Typography variant="caption" fontWeight={700} sx={{ color: '#f472b6', fontSize: '0.65rem', display: 'block', mb: 0.5 }}>
+              <Typography variant="caption" fontWeight={700} sx={{ color: '#f472b6', fontSize: '0.8rem', display: 'block', mb: 0.5 }}>
                 🟢 子任务评估
               </Typography>
-              <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.55rem', display: 'block', mb: 1 }}>
+              <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.85rem', display: 'block', mb: 1 }}>
                 裁决: <span style={{ color: pipelineData.sub_eval_status === 'verified' ? '#22c55e' : '#ef4444' }}>
                   {pipelineData.sub_eval_status === 'verified' ? '✅ PASS' : '❌ FAIL'}
                 </span> | 分数: {(pipelineData.sub_eval_score * 100 || 0).toFixed(0)}分
               </Typography>
-              <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1', fontSize: '0.55rem', display: 'block', mb: 0.3 }}>🔍 规则引擎</Typography>
+              <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1', fontSize: '0.85rem', display: 'block', mb: 0.3 }}>🔍 规则引擎</Typography>
               {pipelineData.sub_eval_rule_breakdown?.split(', ').map((part, i) => {
                 const m = part.match(/(\w+):(PASS|FAIL)\(([\d.]+)\)/)
                 if (!m) return null
                 return (
                   <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.2, px: 1, bgcolor: '#0a0e1a', borderRadius: 1, mb: 0.3 }}>
-                    <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem' }}>{m[1]}</Typography>
-                    <Typography variant="caption" sx={{ color: m[2] === 'PASS' ? '#22c55e' : '#ef4444', fontSize: '0.5rem', fontWeight: 600 }}>
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.8rem' }}>{m[1]}</Typography>
+                    <Typography variant="caption" sx={{ color: m[2] === 'PASS' ? '#22c55e' : '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>
                       {m[2] === 'PASS' ? '✅' : '❌'} {(parseFloat(m[3]) * 100).toFixed(0)}分
                     </Typography>
                   </Box>
                 )
               })}
               <Box sx={{ bgcolor: '#0a0e1a', borderRadius: 1, p: 0.8, mb: 1.5 }}>
-                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem', display: 'block', mb: 0.2 }}>🤖 LLM评分: {(pipelineData.sub_eval_llm_score * 100 || 0).toFixed(0)}分</Typography>
-                <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', fontStyle: 'italic', lineHeight: 1.3 }}>{pipelineData.sub_eval_llm_reason || pipelineData.sub_eval_summary || '无'}</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.8rem', display: 'block', mb: 0.2 }}>🤖 LLM评分: {(pipelineData.sub_eval_llm_score * 100 || 0).toFixed(0)}分</Typography>
+                <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem', fontStyle: 'italic', lineHeight: 1.3 }}>{pipelineData.sub_eval_llm_reason || pipelineData.sub_eval_summary || '无'}</Typography>
               </Box>
               <Divider sx={{ my: 1.5, borderColor: '#1e293b' }} />
             </>
           )}
 
           {/* ---- Main Task Evaluation ---- */}
-          <Typography variant="caption" fontWeight={700} sx={{ color: '#eab308', fontSize: '0.65rem', display: 'block', mb: 0.5 }}>
+          <Typography variant="caption" fontWeight={700} sx={{ color: '#eab308', fontSize: '0.8rem', display: 'block', mb: 0.5 }}>
             🟡 主任务评估
           </Typography>
-          <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.55rem', display: 'block', mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.85rem', display: 'block', mb: 1 }}>
             总体裁决: <span style={{ color: pipelineData?.eval_status === 'verified' ? '#22c55e' : '#ef4444' }}>
               {pipelineData?.eval_status === 'verified' ? '✅ PASS' : '❌ FAIL'}
             </span> | 综合分数: <span style={{ color: '#e2e8f0' }}>{(pipelineData?.eval_score * 100 || 0).toFixed(0)}分</span>
           </Typography>
-          <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1', fontSize: '0.55rem', display: 'block', mb: 0.3 }}>🔍 规则引擎评估</Typography>
+          <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1', fontSize: '0.85rem', display: 'block', mb: 0.3 }}>🔍 规则引擎评估</Typography>
           {pipelineData?.eval_rule_breakdown?.split(', ').map((part, i) => {
             const m = part.match(/(\w+):(PASS|FAIL)\(([\d.]+)\)/)
             if (!m) return null
             return (
               <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.2, px: 1, bgcolor: '#0a0e1a', borderRadius: 1, mb: 0.3 }}>
-                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem' }}>{m[1]}</Typography>
-                <Typography variant="caption" sx={{ color: m[2] === 'PASS' ? '#22c55e' : '#ef4444', fontSize: '0.5rem', fontWeight: 600 }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.8rem' }}>{m[1]}</Typography>
+                <Typography variant="caption" sx={{ color: m[2] === 'PASS' ? '#22c55e' : '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>
                   {m[2] === 'PASS' ? '✅' : '❌'} {(parseFloat(m[3]) * 100).toFixed(0)}分
                 </Typography>
               </Box>
             )
           })}
           <Box sx={{ bgcolor: '#0a0e1a', borderRadius: 1, p: 0.8, mb: 1 }}>
-            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.5rem', display: 'block', mb: 0.2 }}>🤖 LLM 评分: {(pipelineData?.eval_llm_score * 100 || 0).toFixed(0)}分</Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.5rem', fontStyle: 'italic', lineHeight: 1.3 }}>{pipelineData?.eval_llm_reason || pipelineData?.eval_summary || '无'}</Typography>
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.8rem', display: 'block', mb: 0.2 }}>🤖 LLM 评分: {(pipelineData?.eval_llm_score * 100 || 0).toFixed(0)}分</Typography>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8rem', fontStyle: 'italic', lineHeight: 1.3 }}>{pipelineData?.eval_llm_reason || pipelineData?.eval_summary || '无'}</Typography>
           </Box>
         </DialogContent>
         <DialogActions>

@@ -70,29 +70,29 @@ export default function ApprovalModal() {
 
           <Box sx={{ display: 'flex', gap: 1.5, mb: 1 }}>
             <Box sx={{ flex: 1, textAlign: 'center' }}>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.55rem' }}>RULE</Typography>
+              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.85rem' }}>RULE</Typography>
               <Box sx={{ mt: 0.3 }}>
                 <LinearProgress variant="determinate" value={(rule_score || 0) * 100}
                   sx={{ height: 6, borderRadius: 3, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: '#6366f1' } }} />
-                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.55rem' }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.85rem' }}>
                   {((rule_score || 0) * 100).toFixed(0)}%
                 </Typography>
               </Box>
             </Box>
             {llm_score !== undefined && llm_score !== null && (
               <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.55rem' }}>LLM</Typography>
+                <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.85rem' }}>LLM</Typography>
                 <Box sx={{ mt: 0.3 }}>
                   <LinearProgress variant="determinate" value={(llm_score || 0) * 100}
                     sx={{ height: 6, borderRadius: 3, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: llm_score >= 0.6 ? '#22c55e' : '#eab308' } }} />
-                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.55rem' }}>
+                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.85rem' }}>
                     {((llm_score || 0) * 100).toFixed(0)}%
                   </Typography>
                 </Box>
               </Box>
             )}
             <Box sx={{ flex: 1, textAlign: 'center' }}>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.55rem' }}>FINAL</Typography>
+              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.85rem' }}>FINAL</Typography>
               <Box sx={{ mt: 0.3 }}>
                 <LinearProgress variant="determinate" value={(score || 0) * 100}
                   sx={{ height: 8, borderRadius: 3, bgcolor: '#1e293b', '& .MuiLinearProgress-bar': { bgcolor: finalColor } }} />
@@ -104,12 +104,12 @@ export default function ApprovalModal() {
           </Box>
 
           {llm_reason && (
-            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.6rem', display: 'block', mb: 0.5 }}>
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>
               <span style={{ color: '#64748b' }}>LLM: </span>{llm_reason}
             </Typography>
           )}
           {summary && (
-            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.55rem', display: 'block' }}>
+            <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.85rem', display: 'block' }}>
               {summary}
             </Typography>
           )}
@@ -130,13 +130,13 @@ export default function ApprovalModal() {
               <Typography variant="caption" fontWeight={700} sx={{ color: '#22c55e', display: 'block', mb: 0.5 }}>
                 ✅ ACCEPT
               </Typography>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.55rem', display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.85rem', display: 'block' }}>
                 Release {rewardEth} ETH
               </Typography>
-              <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.6rem', fontWeight: 600, display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.75rem', fontWeight: 600, display: 'block' }}>
                 Reputation +{repDelta}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.3 }}>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mt: 0.3 }}>
                 CAW Release → settled
               </Typography>
             </Box>
@@ -149,13 +149,13 @@ export default function ApprovalModal() {
               <Typography variant="caption" fontWeight={700} sx={{ color: '#ef4444', display: 'block', mb: 0.5 }}>
                 ❌ REJECT
               </Typography>
-              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.55rem', display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.85rem', display: 'block' }}>
                 Funds returned to buyer
               </Typography>
-              <Typography variant="caption" sx={{ color: '#ef4444', fontSize: '0.6rem', fontWeight: 600, display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600, display: 'block' }}>
                 Reputation -20
               </Typography>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.3 }}>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mt: 0.3 }}>
                 ⛓️ On-chain slash event
               </Typography>
             </Box>

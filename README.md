@@ -112,9 +112,10 @@ C4Component
 **Key safety invariant**: The Evaluator outputs a signal but **never touches funds**. Only CAW Pact Release moves money.
 ---
 ## On-Chain Contracts
-| Contract | Address (Sepolia) | Explorer |
-|----------|-------------------|----------|
-| AEPReputation | `0x56286C4E051ba476Fe20E69Aec63d712D9835823` | [View](https://sepolia.etherscan.io/address/0x56286C4E051ba476Fe20E69Aec63d712D9835823) |
+| Contract | Address (Sepolia) | Explorer | Notes |
+|----------|-------------------|----------|-------|
+| AEPReputation | `0x56286C4E051ba476Fe20E69Aec63d712D9835823` | [View](https://sepolia.etherscan.io/address/0x56286C4E051ba476Fe20E69Aec63d712D9835823) | ✅ Deployed & verified |
+| AEPBounty | `contract-foundry/src/AEPBounty.sol` | — | On-chain bounty state machine (Open→Assigned→Submitted→Verified/Slashed/Refunded), integrates with AEPReputation via `IAgentReputation` interface |
 **Features:**
 - Score range: 0–100  
 - Authorized caller (backend) can `updateScore` with delta validation  
@@ -125,8 +126,8 @@ C4Component
 | Role | Wallet Type | CAW Mode | Notes |
 |------|------------|----------|-------|
 | Buyer | MPC (paired with CAW App) | Human-in-the-loop | Pact + CAW App approval for high-value flows |
-| Provider | Custodial (agent-owned) | Auto-approve within policy | No human pairing; CAW enforces Pact policies |
-| Sub-Provider | Custodial / MPC | Configurable | Typically custodial for high-frequency sub-tasks |
+| Provider | MPC (unpaired) | API auto-approve | No human pairing; Pact policies enforced via API |
+| Sub-Provider | MPC (unpaired) | API auto-approve | Auto-settled by Provider via Pact |
 Fund flow: **Buyer locks via Pact → Evaluator verifies → Provider receives settlement → Sub-Providers paid downstream**.
 ---
 ## Risks & Boundaries
@@ -306,12 +307,15 @@ Completed for Cobo Track Hackathon (2026-06-13):
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| 📹 Demo video production | Immediate | 3-5 min walkthrough following demo script |
-| 🎨 UI polish | High | Dark theme refinement, responsive layout |
-| 🌐 Public deployment | Medium | Docker Compose on VPS with public URL |
+| 🌐 Public deployment | High | Docker Compose on VPS with public URL |
+| 🎨 UI polish | Medium | Dark theme refinement, responsive layout |
 | 🔐 Mainnet readiness | Medium | Production CAW API, real ETH gas |
 | 🧪 Multi-bounty concurrent test | Low | Scale test with 10+ concurrent bounties |
 | 📊 Reputation dashboard | Low | Historical trend chart, agent comparison |
+| 🤝 Multi-agent bidding | Low | Multiple Providers bid on same bounty |
+| ⚖️ Dispute resolution | Low | On-chain dispute mechanism with ZK proofs |
+| 🌉 Cross-chain support | Low | Multi-chain Pact locking (Base, Arbitrum, OP) |
+| 🏛️ DAO governance | Low | Community-governed reputation parameters |
 
 ---
 ## License

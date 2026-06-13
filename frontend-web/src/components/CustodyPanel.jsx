@@ -106,33 +106,33 @@ export default function CustodyPanel() {
               transition: 'all 0.3s',
             }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.65rem' }}>
+                <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.8rem' }}>
                   Pact #{item.jobId}
                 </Typography>
                 <Chip label={isActive ? '✅ 已审批' : '⏳ 待审批'} size="small"
-                  sx={{ height: 16, fontSize: '0.5rem',
+                  sx={{ height: 16, fontSize: '0.8rem',
                     bgcolor: isActive ? '#22c55e22' : '#eab30822',
                     color: isActive ? '#22c55e' : '#eab308'
                   }} />
               </Box>
-              <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.6rem', display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.75rem', display: 'block' }}>
                 {item.type === 'lock' ? '🔒 Lock' : '💸 Release'} {formatAmount(item.amount)} ETH
                 {item.type === 'release' && (
-                  <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.5rem', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.8rem', display: 'block' }}>
                     放款待审批
                   </Typography>
                 )}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.2 }}>
+              <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mt: 0.2 }}>
                 CAW: {item.pactId?.slice(0, 8)}... | {realStatus || 'pending_approval'}
               </Typography>
               {isPending && (
-                <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.55rem', display: 'block', mt: 0.3 }}>
+                <Typography variant="caption" sx={{ color: '#eab308', fontSize: '0.85rem', display: 'block', mt: 0.3 }}>
                   📱 请在 Cobo 钱包中审批
                 </Typography>
               )}
               {isActive && (
-                <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.55rem', display: 'block', mt: 0.3 }}>
+                <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.85rem', display: 'block', mt: 0.3 }}>
                   ✅ 已在 Cobo 中确认
                 </Typography>
               )}
@@ -164,7 +164,7 @@ export default function CustodyPanel() {
           ⛓️ 链上记录
         </Typography>
         {repTxHashes.length === 0 ? (
-          <Typography variant="caption" sx={{ color: '#334155', fontSize: '0.6rem', textAlign: 'center', display: 'block', mt: 2 }}>
+          <Typography variant="caption" sx={{ color: '#334155', fontSize: '0.75rem', textAlign: 'center', display: 'block', mt: 2 }}>
             暂无链上交易记录
           </Typography>
         ) : repTxHashes.map((entry, i) => (
@@ -174,13 +174,13 @@ export default function CustodyPanel() {
           }}>
               {entry.type === 'transfer' ? (
                 <>
-                  <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.65rem', display: 'block' }}>
+                  <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.8rem', display: 'block' }}>
                     💸 {entry.from === 'buyer' ? 'Buyer → Provider' : 'Provider → SubProvider'}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.6rem', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#22c55e', fontSize: '0.75rem', display: 'block' }}>
                     {entry.amount} ETH
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.2 }}>
+                  <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mt: 0.2 }}>
                     <a href={`https://sepolia.etherscan.io/tx/${entry.txHash}`} target="_blank" rel="noopener noreferrer"
                       style={{ color: '#6366f1' }}>
                       {entry.txHash?.slice(0, 20)}...
@@ -189,13 +189,13 @@ export default function CustodyPanel() {
                 </>
               ) : (
                 <>
-                  <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.65rem', display: 'block' }}>
+                  <Typography variant="caption" fontWeight={600} sx={{ color: '#e2e8f0', fontSize: '0.8rem', display: 'block' }}>
                     🏅 {entry.agent?.slice(0, 10)}... {entry.delta > 0 ? '+' : ''}{entry.delta}分
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.6rem', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block' }}>
                     {entry.oldScore} → {entry.newScore}分
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.5rem', display: 'block', mt: 0.2 }}>
+                  <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.8rem', display: 'block', mt: 0.2 }}>
                     <a href={`https://sepolia.etherscan.io/tx/${entry.txHash}`} target="_blank" rel="noopener noreferrer"
                       style={{ color: '#6366f1' }}>
                       {entry.txHash?.slice(0, 20)}...

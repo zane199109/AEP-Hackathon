@@ -861,13 +861,41 @@ func (h *Handler) ConfirmJob(w http.ResponseWriter, r *http.Request) {
 				childAmount = fmt.Sprintf("%.4f", float64(wei)/1e18)
 			}
 		}
+		// Child transfer: push immediately if tx hash available
 		if result.Success && result.ChildTxHash != "" {
 			h.sse.pushEvent("transfer_completed", jID, "settled", "green",
 				fmt.Sprintf(`{"from":"provider","to":"sub_provider","txHash":"%s","amount":"%s"}`, result.ChildTxHash, childAmount))
 		}
-		if result.Success && result.ParentTxHash != "" {
+		// Parent transfer: push amount immediately even if tx hash not yet available
+		// (MPC paired wallet requires human CAW App approval — tx hash may lag)
+		if result.Success {
+			parentTxHash := result.ParentTxHash
+			if parentTxHash == "" {
+				parentTxHash = result.TransferTxID // fallback: show transfer request ID
+			}
 			h.sse.pushEvent("transfer_completed", jID, "settled", "green",
-				fmt.Sprintf(`{"from":"buyer","to":"provider","txHash":"%s","amount":"%s"}`, result.ParentTxHash, parentAmount))
+				fmt.Sprintf(`{"from":"buyer","to":"provider","txHash":"%s","amount":"%s"}`, parentTxHash, parentAmount))
+			// If tx hash not available yet, poll for it in background
+			if result.ParentTxHash == "" && result.TransferTxID != "" {
+				go func(txID, walletID string) {
+					ticker := time.NewTicker(3 * time.Second)
+					defer ticker.Stop()
+					deadline := time.After(5 * time.Minute)
+					for {
+						select {
+						case <-deadline:
+							return
+						case <-ticker.C:
+							_, txHash, err := h.caw.GetTransactionByRequestID(context.Background(), walletID, txID)
+							if err == nil && txHash != "" {
+								h.sse.pushEvent("transfer_completed", jID, "settled", "green",
+									fmt.Sprintf(`{"from":"buyer","to":"provider","txHash":"%s","amount":"%s"}`, txHash, parentAmount))
+								return
+							}
+						}
+					}
+				}(result.TransferTxID, h.cfg.CAW.WalletID)
+			}
 		}
 		if !result.Success {
 			h.log.Warn("Relayer: settlement failed", zap.Uint64("job_id", jID), zap.String("status", result.Status), zap.String("message", result.Message))
@@ -880,9 +908,11 @@ func (h *Handler) ConfirmJob(w http.ResponseWriter, r *http.Request) {
 						pd.ChildTxHash = result.ChildTxHash
 						pd.ChildAmount = childAmount
 					}
+					pd.ParentAmount = parentAmount
 					if result.ParentTxHash != "" {
 						pd.ParentTxHash = result.ParentTxHash
-						pd.ParentAmount = parentAmount
+					} else if result.TransferTxID != "" {
+						pd.ParentTxHash = result.TransferTxID
 					}
 					h.pipeline.Store(jID, pd)
 				}
