@@ -159,8 +159,8 @@ cd frontend-web && npm run dev
 | Buyer 钱包 | `0x2fce0a555212fc4adfec0eeb731cd96fea01f93e` |
 | Provider 钱包 | `0x12e1aec7224d47376ac3a391f27076ed13df0267` |
 | Sub-Provider 钱包 | `0xdf782505c76f2ee59ffbd9f4385feec266c06b99` |
-| Buyer→Provider TX | (待补充) |
-| Provider→Sub TX | (待补充) |
+| Buyer→Provider TX | `0xacb4fbf04a4b0dd1c5a2a1eff9eb7fb503aee1cfed430e3af3d4bdd381bbeb29` |
+| Provider→Sub TX | `0xa343a18f9299a5e2888d52ed7d6b3d81455ed78a96eb2c7eae1e39a3a7379557` |
 
 ## 注意事项
 

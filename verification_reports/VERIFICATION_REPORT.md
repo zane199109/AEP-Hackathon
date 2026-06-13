@@ -41,12 +41,10 @@
 
 | Description | Tx Hash | Explorer |
 |-------------|---------|----------|
+| Buyer→Provider release | `0xacb4fbf04a4b0dd1c5a2a1eff9eb7fb503aee1cfed430e3af3d4bdd381bbeb29` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0xacb4fbf04a4b0dd1c5a2a1eff9eb7fb503aee1cfed430e3af3d4bdd381bbeb29) |
 | Provider→SubProvider settlement | `0xa343a18f9299a5e2888d52ed7d6b3d81455ed78a96eb2c7eae1e39a3a7379557` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0xa343a18f9299a5e2888d52ed7d6b3d81455ed78a96eb2c7eae1e39a3a7379557) |
 | Gas key→Buyer (0.05 ETH top-up) | `0xceb7936d09a28568233fd2129832d97c0765fd9b194ceddf4a2028e2a3e16614` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0xceb7936d09a28568233fd2129832d97c0765fd9b194ceddf4a2028e2a3e16614) |
 | Provider reputation update (+3) | `0x5a69e26d305a81e802b0af11139463875c302998823b5213cb3d397406c67712` | [Sepolia Etherscan](https://sepolia.etherscan.io/tx/0x5a69e26d305a81e802b0af11139463875c302998823b5213cb3d397406c67712) |
-
-> **Note:** Buyer→Provider release tx hash appears after Buyer approves in CAW App.
-> Reputation update tx hashes appear via SSE `reputation_updated` event.
 
 ---
 
